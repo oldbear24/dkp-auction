@@ -33,6 +33,10 @@ func main() {
 		}
 		return e.Next()
 	})
+	app.OnRecordCreate("users").BindFunc(func(e *core.RecordEvent) error {
+		e.Record.Set("role", "member")
+		return e.Next()
+	})
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}

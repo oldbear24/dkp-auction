@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
+	_ "github.com/oldbear24/dkp-auction/migrations"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
-	_ "github.com/pocketbase/pocketbase/migrations"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 	"github.com/pocketbase/pocketbase/tools/subscriptions"
 	"golang.org/x/sync/errgroup"

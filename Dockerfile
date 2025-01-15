@@ -10,6 +10,6 @@ RUN go build -o /go/bin/app -v .
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /app
-CMD ["app", "serve", "--http=0.0.0.0:3000"]
+CMD ["/app", "serve", "--http=0.0.0.0:3000"]
 LABEL Name=dkpauction Version=0.0.1
 EXPOSE 3000

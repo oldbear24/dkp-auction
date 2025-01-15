@@ -8,8 +8,9 @@ import (
 func init() {
 	m.Register(func(app core.App) error {
 		// add up queries...
-		app.Settings().Meta.AppName = "Auction DKP"
-		return nil
+		settings := app.Settings()
+		settings.Meta.AppName = "Auction DKP"
+		return app.Save(settings)
 	}, func(app core.App) error {
 		// add down queries...
 

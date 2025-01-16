@@ -39,7 +39,7 @@ func main() {
 			}
 			return e.Next()
 		})
-		se.Router.POST("/api/bid/:id", func(e *core.RequestEvent) error {
+		se.Router.POST("/api/bid/{id}", func(e *core.RequestEvent) error {
 			app.Logger().Debug("Bid event", "eventData", e)
 			bodyData := make([]byte, e.Request.ContentLength)
 			_, err := e.Request.Body.Read(bodyData)

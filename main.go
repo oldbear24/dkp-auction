@@ -41,16 +41,11 @@ func main() {
 		})
 		se.Router.POST("/api/bid/{id}", func(e *core.RequestEvent) error {
 			app.Logger().Debug("Bid event", "eventData", e)
-			bodyData := make([]byte, e.Request.ContentLength)
-			_, err := e.Request.Body.Read(bodyData)
+			bidData := BidStruct{}
+			err := e.BindBody(&bidData)
+
 			if err != nil {
 				return e.BadRequestError("Error reading request body", err)
-			}
-			defer e.Request.Body.Close()
-			bidData := BidStruct{}
-			err = json.Unmarshal(bodyData, &bidData)
-			if err != nil {
-				return e.BadRequestError("Error parsing request body", err)
 			}
 
 			biddedAmount := bidData.Amount

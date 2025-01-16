@@ -52,7 +52,7 @@ func main() {
 			if e.Auth == nil {
 				return e.UnauthorizedError("Unauthorized", nil)
 			}
-			auctionId := e.Request.URL.Query().Get("id")
+			auctionId := e.Request.PathValue("id")
 			if auctionId == "" {
 				return e.BadRequestError("Auction ID is required", nil)
 			}

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	_ "github.com/oldbear24/dkp-auction/migrations"
 	"github.com/pocketbase/dbx"
@@ -40,7 +41,7 @@ func main() {
 			return e.Next()
 		})
 		se.Router.POST("/api/bid/{id}", func(e *core.RequestEvent) error {
-			app.Logger().Debug("Bid event", "eventData", e)
+			//	app.Logger().Debug("Bid event", "eventData", e)
 			bidData := BidStruct{}
 			err := e.BindBody(&bidData)
 
@@ -56,10 +57,10 @@ func main() {
 			if auctionId == "" {
 				return e.BadRequestError("Auction ID is required", nil)
 			}
-			app.RunInTransaction(func(tx core.App) error {
+			return app.RunInTransaction(func(tx core.App) error {
 				auctionRecord, err := tx.FindRecordById("auctions", auctionId)
 				if err != nil {
-					app.Logger().Error("Error finding auction", "error", err, "id", auctionId)
+					e.App.Logger().Error("Error finding auction", "error", err, "id", auctionId)
 					return e.BadRequestError("Auction not found", err)
 				}
 				if auctionRecord.GetString("state") != "ongoing" {
@@ -67,15 +68,20 @@ func main() {
 				}
 				user, err := tx.FindRecordById("users", e.Auth.Id)
 				if err != nil {
-					app.Logger().Error("Error finding user", "error", err)
+					e.App.Logger().Error("Error finding user", "error", err)
 					return e.BadRequestError("User not found", err)
 				}
 				var biddedOnAuction int = 0
 				bidRecordExists := false
-				bidRecord, err := tx.FindRecordsByFilter("bids", "user = {:auctionId} && user = {:userId}", "", 1, 0, dbx.Params{"auctionId": auctionId, "userId": e.Auth.Id})
-				if err == nil {
-					bidRecordExists = true
+				bidRecord, err := tx.FindRecordsByFilter("bids", "auction = {:auctionId} && user = {:userId}", "", 1, 0, dbx.Params{"auctionId": auctionId, "userId": e.Auth.Id})
+				if err != nil {
+					e.App.Logger().Error("Error finding bid", "error", err)
+					return e.BadRequestError("Error finding bid", err)
+				}
+				if len(bidRecord) > 0 {
 					biddedOnAuction = bidRecord[0].GetInt("amount")
+					bidRecordExists = true
+
 				}
 				auctionBid := auctionRecord.GetInt("currentBid")
 				if auctionBid == 0 {
@@ -89,12 +95,18 @@ func main() {
 				if biddedAmount > userTokens {
 					return e.BadRequestError("Insufficient tokens", nil)
 				}
-				fullAuctionBid := auctionBid + biddedOnAuction
-				if biddedAmount <= fullAuctionBid {
+				fullAuctionBid := biddedAmount + biddedOnAuction
+				if auctionBid >= fullAuctionBid {
 					return e.BadRequestError("Bid sum should be greater than current bid", nil)
 				}
 				auctionRecord.Set("currentBid", fullAuctionBid)
+				err = tx.Save(auctionRecord)
+				if err != nil {
+					e.App.Logger().Error("Error updating auction", "error", err)
+					return e.BadRequestError("Error updating auction", err)
+				}
 				if bidRecordExists {
+					bidRecord[0].Set("timestamp", time.Now().Unix())
 					bidRecord[0].Set("amount", biddedAmount)
 					err = tx.Save(bidRecord[0])
 					if err != nil {
@@ -103,13 +115,14 @@ func main() {
 				} else {
 					coll, err := tx.FindCollectionByNameOrId("bids")
 					if err != nil {
-						app.Logger().Error("Error finding collection", "error", err)
+						e.App.Logger().Error("Error finding collection", "error", err)
 						return e.BadRequestError("Error finding collection", err)
 					}
 					newBidRecord := core.NewRecord(coll)
-					newBidRecord.Set("amount", biddedAmount)
-					newBidRecord.Set("auctionId", auctionId)
-					newBidRecord.Set("userId", e.Auth.Id)
+					newBidRecord.Set("timestamp", time.Now().Unix())
+					newBidRecord.Set("amount", fullAuctionBid)
+					newBidRecord.Set("auction", auctionId)
+					newBidRecord.Set("user", e.Auth.Id)
 					err = tx.Save(newBidRecord)
 					if err != nil {
 						return e.BadRequestError("Error creating bid", err)
@@ -123,13 +136,12 @@ func main() {
 				return nil
 			})
 
-			return e.Next()
 		})
 		return se.Next()
 	})
 	app.OnRecordAuthWithOAuth2Request("users").BindFunc(func(e *core.RecordAuthWithOAuth2RequestEvent) error {
 
-		app.Logger().Debug("Discord auth event", "eventData", e)
+		e.App.Logger().Debug("Discord auth event", "eventData", e)
 		return e.Next()
 	})
 	app.OnRecordCreate("users").BindFunc(func(e *core.RecordEvent) error {

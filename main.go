@@ -17,7 +17,11 @@ import (
 func main() {
 	app := pocketbase.New()
 	// Add your custom routes or hooks here
-
+	app.Cron().MustAdd("finishAuctions", "* * * * *", func() {
+		if err := finishAuction(app); err != nil {
+			app.Logger().Error("finishAuction error", "error", err)
+		}
+	})
 	// loosely check if it was executed using "go run"
 	isGoRun := strings.HasPrefix(os.Args[0], os.TempDir())
 

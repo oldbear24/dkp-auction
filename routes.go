@@ -6,6 +6,7 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 func RegisterRoutes(se *core.ServeEvent) {
@@ -36,7 +37,10 @@ func handleBid(e *core.RequestEvent) error {
 		if err != nil {
 			return e.NotFoundError("Auction not found", err)
 		}
+		if auction.GetDateTime("endTime").Before(types.NowDateTime()) {
+			return e.BadRequestError("Auction has ended", nil)
 
+		}
 		// 2. Validate auction state
 		if auction.GetString("state") != "ongoing" {
 			return e.BadRequestError("Auction is not active", nil)
@@ -83,7 +87,7 @@ func handleBid(e *core.RequestEvent) error {
 			previousAmount := bidRecord.GetInt("amount")
 			user.Set("reservedTokens", user.GetInt("reservedTokens")-previousAmount)
 		} else {
-			collection, err := tx.FindCollectionByNameOrId("bids")
+			collection, err := tx.FindCachedCollectionByNameOrId("bids")
 			if err != nil {
 				return e.BadRequestError("Error creating bid", err)
 			}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"time"
 
 	"github.com/pocketbase/dbx"
@@ -11,6 +12,74 @@ import (
 
 func RegisterRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/bid/{id}", handleBid).Bind(apis.RequireAuth())
+	se.Router.POST("/api/change-tokens", chaneUsersAmount).Bind(apis.RequireAuth())
+	se.Router.POST("/api/set-verified/{user}", setVerified).Bind(apis.RequireAuth())
+
+}
+
+func setVerified(e *core.RequestEvent) error {
+	var data struct {
+		Verified bool `json:"verified"`
+	}
+	if condition := e.Auth == nil; condition {
+		return e.UnauthorizedError("Unauthorized", nil)
+	}
+	if condition := !slices.Contains(e.Auth.GetStringSlice("roles"), "manager"); condition {
+		return e.UnauthorizedError("Unauthorized", nil)
+	}
+	if err := e.BindBody(&data); err != nil {
+		return e.BadRequestError("Invalid data", err)
+	}
+	user, err := e.App.FindRecordById("users", e.Request.PathValue("user"))
+	if err != nil {
+		return e.BadRequestError("User not found", err)
+	}
+	user.Set("verified", data.Verified)
+	if err := e.App.Save(user); err != nil {
+		return e.BadRequestError("Error saving user", err)
+	}
+	return e.JSON(200, map[string]interface{}{
+		"success": true,
+	})
+}
+
+func chaneUsersAmount(e *core.RequestEvent) error {
+	var data struct {
+		UserIds []string `json:"userIds"`
+		Amount  int      `json:"amount"`
+	}
+
+	if err := e.BindBody(&data); err != nil {
+		return e.BadRequestError("Invalid data", err)
+	}
+
+	if e.Auth == nil {
+		return e.UnauthorizedError("Unauthorized", nil)
+	}
+	if !slices.Contains(e.Auth.GetStringSlice("roles"), "manager") {
+		return e.UnauthorizedError("Unauthorized", nil)
+
+	}
+	return e.App.RunInTransaction(func(tx core.App) error {
+		for _, userId := range data.UserIds {
+			user, err := tx.FindRecordById("users", userId)
+			if err != nil {
+				return e.BadRequestError("User not found", err)
+			}
+			newAmount := user.GetInt("tokens") + data.Amount
+			if newAmount < 0 {
+				newAmount = 0
+
+			}
+			user.Set("tokens", newAmount)
+			if err := tx.Save(user); err != nil {
+				return e.BadRequestError("Error saving user", err)
+			}
+		}
+		return e.JSON(200, map[string]interface{}{
+			"success": true,
+		})
+	})
 }
 
 func handleBid(e *core.RequestEvent) error {

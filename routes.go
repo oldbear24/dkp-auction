@@ -13,13 +13,13 @@ import (
 func RegisterRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/bid/{id}", handleBid).Bind(apis.RequireAuth())
 	se.Router.POST("/api/change-tokens", chaneUsersAmount).Bind(apis.RequireAuth())
-	se.Router.POST("/api/set-verified/{user}", setVerified).Bind(apis.RequireAuth())
+	se.Router.POST("/api/set-validated/{user}", setVerified).Bind(apis.RequireAuth())
 
 }
 
 func setVerified(e *core.RequestEvent) error {
 	var data struct {
-		Verified bool `json:"verified"`
+		Validated bool `json:"validated"`
 	}
 	if condition := e.Auth == nil; condition {
 		return e.UnauthorizedError("Unauthorized", nil)
@@ -34,7 +34,7 @@ func setVerified(e *core.RequestEvent) error {
 	if err != nil {
 		return e.BadRequestError("User not found", err)
 	}
-	user.Set("verified", data.Verified)
+	user.Set("validated", data.Validated)
 	if err := e.App.Save(user); err != nil {
 		return e.BadRequestError("Error saving user", err)
 	}

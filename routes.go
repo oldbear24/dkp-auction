@@ -13,9 +13,30 @@ func RegisterRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/bid/{id}", handleBid).Bind(apis.RequireAuth())
 	se.Router.POST("/api/change-tokens", chaneUsersAmount).Bind(apis.RequireAuth())
 	se.Router.POST("/api/set-validated/{user}", setVerified).Bind(apis.RequireAuth())
+	se.Router.POST("/api/resolve-auction/{id}", resolveAuction).Bind(apis.RequireAuth())
 
 }
-
+func resolveAuction(e *core.RequestEvent) error {
+	if !checkIfUserIsInRole(e.Auth, "manager") {
+		return e.UnauthorizedError("Unauthorized", nil)
+	}
+	auctionResolveId := e.Request.PathValue("id")
+	if auctionResolveId == "" {
+		return e.BadRequestError("Auction result ID is required", nil)
+	}
+	record, err := e.App.FindRecordById("auctionsResult", auctionResolveId)
+	if err != nil {
+		return e.BadRequestError("Could not retrieve record", err)
+	}
+	record.Set("resolved", true)
+	record.Set("resolvedBy", e.Auth.Id)
+	if err := e.App.Save(record); err != nil {
+		return e.BadRequestError("Could not save record", err)
+	}
+	return e.JSON(200, map[string]interface{}{
+		"success": true,
+	})
+}
 func setVerified(e *core.RequestEvent) error {
 	var data struct {
 		Validated bool `json:"validated"`

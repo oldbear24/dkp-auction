@@ -21,7 +21,7 @@ func setVerified(e *core.RequestEvent) error {
 	var data struct {
 		Validated bool `json:"validated"`
 	}
-	if condition := !slices.Contains(e.Auth.GetStringSlice("roles"), "manager"); condition {
+	if condition := !slices.Contains(e.Auth.GetStringSlice("role"), "manager"); condition {
 		return e.UnauthorizedError("Unauthorized", nil)
 	}
 	if err := e.BindBody(&data); err != nil {
@@ -50,7 +50,7 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 		return e.BadRequestError("Invalid data", err)
 	}
 
-	if !slices.Contains(e.Auth.GetStringSlice("roles"), "manager") {
+	if !slices.Contains(e.Auth.GetStringSlice("role"), "manager") {
 		return e.UnauthorizedError("Unauthorized", nil)
 
 	}

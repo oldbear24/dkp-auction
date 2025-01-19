@@ -28,6 +28,9 @@ func resolveAuction(e *core.RequestEvent) error {
 	if err != nil {
 		return e.BadRequestError("Could not retrieve record", err)
 	}
+	if record.GetBool("resolved") {
+		e.BadRequestError("Record is already resolved!", nil)
+	}
 	record.Set("resolved", true)
 	record.Set("resolvedBy", e.Auth.Id)
 	if err := e.App.Save(record); err != nil {

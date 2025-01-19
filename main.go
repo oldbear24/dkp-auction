@@ -58,7 +58,7 @@ func main() {
 	})
 	app.OnRecordAfterUpdateSuccess("users").BindFunc(func(e *core.RecordEvent) error {
 		var data struct {
-			UserId string `json:"userIds"`
+			UserId string `json:"userId"`
 		}
 		data.UserId = e.Record.Id
 		notify(e.App, "manage_users_update", data)

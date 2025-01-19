@@ -7,5 +7,5 @@ import (
 )
 
 func checkIfUserIsInRole(record *core.Record, role string) bool {
-	return slices.Contains(record.GetStringSlice("roles"), role)
+	return slices.Contains(record.GetStringSlice("role"), role)
 }

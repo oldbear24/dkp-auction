@@ -83,15 +83,20 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 			if err != nil {
 				return e.BadRequestError("User not found", err)
 			}
-			newAmount := user.GetInt("tokens") + data.Amount
-			if newAmount < 0 {
-				newAmount = 0
-
+			if data.Amount < 0 {
+				return e.BadRequestError("Amount cannot be lower than 0", nil)
 			}
+
+			newAmount := user.GetInt("tokens") + data.Amount
+
 			user.Set("tokens", newAmount)
 			if err := tx.Save(user); err != nil {
 				return e.BadRequestError("Error saving user", err)
 			}
+			if err := createTransactionRecord(tx, user.Id, data.Amount, "Token addition", e.Auth.Id); err != nil {
+				return e.BadRequestError("Failed to create transaction record", err)
+			}
+
 		}
 		return e.JSON(200, map[string]interface{}{
 			"success": true,

@@ -19,7 +19,7 @@ func createTransactionRecord(app core.App, userId string, amount int, note strin
 	record.Set("user", userId)
 	record.Set("amount", amount)
 	record.Set("note", note)
-	record.Set("authorId", authorId)
+	record.Set("author", authorId)
 	if app.Save(record) != nil {
 		return err
 	}

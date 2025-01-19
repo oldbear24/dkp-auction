@@ -49,7 +49,7 @@ func finishAuction(app *pocketbase.PocketBase) error {
 					if bidRecord.Id == bidRecords[winnerRecordIndex].Id {
 						userRecord.Set("reservedTokens", userRecord.GetInt("reservedTokens")-bidRecord.GetInt("amount"))
 						userRecord.Set("tokens", userRecord.GetInt("tokens")-bidRecord.GetInt("amount"))
-						if err := createTransactionRecord(tx, userRecord.Id, bidRecord.GetInt("amount"), "Win in auction", ""); err != nil {
+						if err := createTransactionRecord(tx, userRecord.Id, -bidRecord.GetInt("amount"), "Win in auction", ""); err != nil {
 							return err
 						}
 					} else {

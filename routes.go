@@ -93,7 +93,7 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 			if err := tx.Save(user); err != nil {
 				return e.BadRequestError("Error saving user", err)
 			}
-			if err := createTransactionRecord(tx, user.Id, data.Amount, "Token addition", e.Auth.Id); err != nil {
+			if err := createTransactionRecord(tx, user.Id, data.Amount, "Token top-up", e.Auth.Id); err != nil {
 				return e.BadRequestError("Failed to create transaction record", err)
 			}
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"slices"
 	"time"
 
 	"github.com/pocketbase/dbx"
@@ -21,7 +20,7 @@ func setVerified(e *core.RequestEvent) error {
 	var data struct {
 		Validated bool `json:"validated"`
 	}
-	if condition := !slices.Contains(e.Auth.GetStringSlice("role"), "manager"); condition {
+	if !checkIfUserIsInRole(e.Auth, "manager") {
 		return e.UnauthorizedError("Unauthorized", nil)
 	}
 	if err := e.BindBody(&data); err != nil {
@@ -50,7 +49,7 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 		return e.BadRequestError("Invalid data", err)
 	}
 
-	if !slices.Contains(e.Auth.GetStringSlice("role"), "manager") {
+	if !checkIfUserIsInRole(e.Auth, "manager") {
 		return e.UnauthorizedError("Unauthorized", nil)
 
 	}

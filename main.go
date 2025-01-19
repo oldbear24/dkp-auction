@@ -56,6 +56,14 @@ func main() {
 		}
 		return e.Next()
 	})
+	app.OnRecordAfterUpdateSuccess("users").BindFunc(func(e *core.RecordEvent) error {
+		var data struct {
+			UserId string `json:"userIds"`
+		}
+		data.UserId = e.Record.Id
+		notify(e.App, "manage_users_update", data)
+		return e.Next()
+	})
 	app.OnRecordCreate("auctions").BindFunc(func(e *core.RecordEvent) error {
 		if e.Record.GetString("state") == "" {
 			e.Record.Set("state", "ongoing")

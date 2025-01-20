@@ -149,16 +149,8 @@ func handleBid(e *core.RequestEvent) error {
 		minBid := max(startingBid, currentBid+1)
 
 		if bidData.Amount < minBid {
-			return e.BadRequestError("Bid too low", nil)
+			return e.BadRequestError("Bid is too low", nil)
 		}
-
-		// 5. Check user balance
-		availableTokens := user.GetInt("tokens") - user.GetInt("reservedTokens")
-		if bidData.Amount > availableTokens {
-			return e.BadRequestError("Insufficient tokens", nil)
-		}
-
-		// 6. Get existing bid
 		existingBids, err := tx.FindRecordsByFilter(
 			"bids",
 			"auction = {:auctionId} && user = {:userId}",
@@ -167,9 +159,20 @@ func handleBid(e *core.RequestEvent) error {
 			0,
 			dbx.Params{"auctionId": auctionId, "userId": e.Auth.Id},
 		)
+		existinBidForCompare := 0
+		if len(existingBids) > 0 {
+			existinBidForCompare = existingBids[0].GetInt("amount")
+		}
 		if err != nil {
 			return e.BadRequestError("Error checking existing bids", err)
 		}
+		// 5. Check user balance
+		availableTokens := user.GetInt("tokens") - (user.GetInt("reservedTokens") + existinBidForCompare)
+		if bidData.Amount > availableTokens {
+			return e.BadRequestError("Insufficient tokens", nil)
+		}
+
+		// 6. Get existing bid
 
 		// 7. Create or update bid
 		var bidRecord *core.Record

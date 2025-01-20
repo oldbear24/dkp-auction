@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	"strings"
@@ -20,6 +21,11 @@ func main() {
 	app.Cron().MustAdd("finishAuctions", "* * * * *", func() {
 		if err := finishAuction(app); err != nil {
 			app.Logger().Error("finishAuction error", "error", err)
+		}
+	})
+	app.Cron().MustAdd("updateUserNames", "0 3 * * *", func() {
+		if err := updateUserNames(app); err != nil {
+			app.Logger().Error("updateUserNames error", "error", err)
 		}
 	})
 	// loosely check if it was executed using "go run"
@@ -67,6 +73,13 @@ func main() {
 	app.OnRecordCreate("auctions").BindFunc(func(e *core.RecordEvent) error {
 		if e.Record.GetString("state") == "" {
 			e.Record.Set("state", "ongoing")
+		}
+		return e.Next()
+	})
+	app.OnRecordCreate("settings").BindFunc(func(e *core.RecordEvent) error {
+		err := e.App.DB().Select("id").From("settings").One(nil)
+		if err == nil {
+			return errors.New("settings record already exists")
 		}
 		return e.Next()
 	})

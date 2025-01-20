@@ -167,7 +167,7 @@ func handleBid(e *core.RequestEvent) error {
 			return e.BadRequestError("Error checking existing bids", err)
 		}
 		// 5. Check user balance
-		availableTokens := user.GetInt("tokens") - (user.GetInt("reservedTokens") + existinBidForCompare)
+		availableTokens := user.GetInt("tokens") - (user.GetInt("reservedTokens") - existinBidForCompare)
 		if bidData.Amount > availableTokens {
 			return e.BadRequestError("Insufficient tokens", nil)
 		}

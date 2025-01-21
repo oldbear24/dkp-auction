@@ -197,7 +197,7 @@ func handleBid(e *core.RequestEvent) error {
 
 		user.Set("reservedTokens", user.GetInt("reservedTokens")+bidData.Amount)
 		auction.Set("currentBid", bidData.Amount)
-		//auction.Set("highestBidder", e.Auth.Id)
+		auction.Set("winner", e.Auth.Id)
 
 		// 9. Save all changes
 		if err := tx.Save(bidRecord); err != nil {

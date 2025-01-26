@@ -2,9 +2,6 @@
 
 DKP Auction House is a PocketBase application for managing auctions and bids in a DKP (Dragon Kill Points) system.
 
-## TODO List
-- [ ] Add token healtcheck (compare tokens owned by users and tokens in transactions).
-
 ## Features
 
 - Create and manage auctions

@@ -182,3 +182,65 @@ func updateUserNames(app *pocketbase.PocketBase) error {
 
 	return nil
 }
+
+func runTokenHealthCheck(app *pocketbase.PocketBase) error {
+	records, err := app.FindAllRecords("users")
+	if err != nil {
+		return err
+	}
+	isError := false
+	userResults := []TokenHealtCheckUser{}
+	for _, record := range records {
+		userTokens := record.GetInt("tokens")
+		transactionRecords, err := app.FindRecordsByFilter("transactions", "user = {:userId}", "", 0, 0, dbx.Params{"userId": record.Id})
+		if err != nil {
+			return err
+		}
+		transactionTokens := 0
+
+		for _, transactionRecord := range transactionRecords {
+			transactionTokens += transactionRecord.GetInt("amount")
+		}
+		differece := userTokens - transactionTokens
+		state := "ok"
+		if differece != 0 {
+			state = "error"
+			isError = true
+		}
+		userResults = append(userResults, TokenHealtCheckUser{
+			State:             state,
+			User:              record.Id,
+			UserTokens:        userTokens,
+			TransactionTokens: transactionTokens,
+			Differece:         differece,
+		})
+	}
+
+	state := "ok"
+	if isError {
+		state = "error"
+	}
+	healthCheck := TokenHealtCheck{
+		State:       state,
+		UserResults: userResults,
+	}
+	coll, err := app.FindCachedCollectionByNameOrId("tokenHealthChecks")
+	if err != nil {
+		return err
+	}
+
+	record := core.NewRecord(coll)
+	jsonData, err := json.Marshal(healthCheck)
+	if err != nil {
+		return err
+	}
+	record.Set("state", healthCheck.State)
+	record.Set("result", string(jsonData))
+	if err := app.Save(record); err != nil {
+		return err
+	}
+	if isError {
+		//notifyRoles("admin", healthCheck)
+	}
+	return nil
+}

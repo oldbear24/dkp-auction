@@ -83,6 +83,7 @@ func main() {
 		}
 		return e.Next()
 	})
+	go startNotificationWorker(app.App)
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}

@@ -59,6 +59,7 @@ func finishAuction(app *pocketbase.PocketBase) error {
 						if err := createTransactionRecord(tx, userRecord.Id, -bidRecord.GetInt("amount"), "Win in auction", ""); err != nil {
 							return err
 						}
+						notifyUser(userRecord.Id, "You won the auction")
 					} else {
 						userRecord.Set("reservedTokens", userRecord.GetInt("reservedTokens")-bidRecord.GetInt("amount"))
 					}
@@ -75,6 +76,7 @@ func finishAuction(app *pocketbase.PocketBase) error {
 			if err := tx.Save(resultRecord); err != nil {
 				return err
 			}
+			notifyRole("manager", "Auction has ended")
 		}
 		return nil
 	})
@@ -162,7 +164,7 @@ func updateUserNames(app *pocketbase.PocketBase) error {
 		if err != nil {
 			return err
 		}
-		records, err := app.FindRecordsByFilter("users", "validated=true", "", 0, 0)
+		records, err := app.FindRecordsByFilter("users", "", "", 0, 0)
 		if err != nil {
 			return err
 		}

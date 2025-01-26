@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pocketbase/dbx"
@@ -14,6 +15,8 @@ func RegisterRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/change-tokens", chaneUsersAmount).Bind(apis.RequireAuth())
 	se.Router.POST("/api/set-validated/{user}", setVerified).Bind(apis.RequireAuth())
 	se.Router.POST("/api/resolve-auction/{id}", resolveAuction).Bind(apis.RequireAuth())
+	se.Router.POST("/api/seen-notifications/{id}", seenNotification).Bind(apis.RequireAuth())
+	se.Router.POST("/api/seen-notifications", seenNotifications).Bind(apis.RequireAuth())
 
 }
 func resolveAuction(e *core.RequestEvent) error {
@@ -97,6 +100,9 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 				return e.BadRequestError("Failed to create transaction record", err)
 			}
 
+		}
+		for _, r := range data.UserIds {
+			notifyUser(r, fmt.Sprintf("Your tokens have been updated by %d", data.Amount))
 		}
 		return e.JSON(200, map[string]interface{}{
 			"success": true,
@@ -214,5 +220,39 @@ func handleBid(e *core.RequestEvent) error {
 			"success": true,
 			"bid":     bidRecord,
 		})
+	})
+}
+
+func seenNotifications(e *core.RequestEvent) error {
+	notifications, err := e.App.FindRecordsByFilter("notifications", "user = {:userId}", "", 0, 0, dbx.Params{"userId": e.Auth.Id})
+	if err != nil {
+		return e.BadRequestError("Error finding notifications", err)
+	}
+	for _, notification := range notifications {
+		notification.Set("seen", true)
+		if err := e.App.Save(notification); err != nil {
+			return e.BadRequestError("Error saving notification", err)
+		}
+	}
+	return e.JSON(200, map[string]interface{}{
+		"success": true,
+	})
+
+}
+func seenNotification(e *core.RequestEvent) error {
+	notificationId := e.Request.PathValue("id")
+	if notificationId == "" {
+		return e.BadRequestError("Notification ID is required", nil)
+	}
+	notification, err := e.App.FindRecordById("notifications", notificationId)
+	if err != nil {
+		return e.BadRequestError("Could not retrieve notification", err)
+	}
+	notification.Set("seen", true)
+	if err := e.App.Save(notification); err != nil {
+		return e.BadRequestError("Could not save notification", err)
+	}
+	return e.JSON(200, map[string]interface{}{
+		"success": true,
 	})
 }

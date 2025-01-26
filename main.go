@@ -28,6 +28,11 @@ func main() {
 			app.Logger().Error("updateUserNames error", "error", err)
 		}
 	})
+	app.Cron().MustAdd("runTokenHealthCheck", "0 1 * * *", func() {
+		if err := runTokenHealthCheck(app); err != nil {
+			app.Logger().Error("runTokenHealthCheck error", "error", err)
+		}
+	})
 	// loosely check if it was executed using "go run"
 	isGoRun := strings.HasPrefix(os.Args[0], os.TempDir())
 

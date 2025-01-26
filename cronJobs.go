@@ -242,7 +242,7 @@ func runTokenHealthCheck(app *pocketbase.PocketBase) error {
 		return err
 	}
 	if isError {
-		//notifyRoles("admin", healthCheck)
+		notifyRole("admin", "Token health check failed")
 	}
 	return nil
 }

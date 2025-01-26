@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pocketbase/dbx"
@@ -97,6 +98,9 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 				return e.BadRequestError("Failed to create transaction record", err)
 			}
 
+		}
+		for _, r := range data.UserIds {
+			notifyUser(r, fmt.Sprintf("Your tokens have been updated by %d", data.Amount))
 		}
 		return e.JSON(200, map[string]interface{}{
 			"success": true,

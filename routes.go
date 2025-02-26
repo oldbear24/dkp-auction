@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/pocketbase/dbx"
@@ -17,6 +18,7 @@ func RegisterRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/resolve-auction/{id}", resolveAuction).Bind(apis.RequireAuth())
 	se.Router.POST("/api/seen-notifications/{id}", seenNotification).Bind(apis.RequireAuth())
 	se.Router.POST("/api/seen-notifications", seenNotifications).Bind(apis.RequireAuth())
+	se.Router.POST("/api/clear-tokens", clearTokens).Bind(apis.RequireAuth())
 
 }
 func resolveAuction(e *core.RequestEvent) error {
@@ -254,5 +256,53 @@ func seenNotification(e *core.RequestEvent) error {
 	}
 	return e.JSON(200, map[string]interface{}{
 		"success": true,
+	})
+}
+func clearTokens(e *core.RequestEvent) error {
+	var data struct {
+		//UserIds    []string `json:"userIds"`
+		Percentage int `json:"percentage"`
+	}
+
+	if err := e.BindBody(&data); err != nil {
+		return e.BadRequestError("Invalid data", err)
+	}
+	if data.Percentage < 0 || data.Percentage > 100 {
+		return e.BadRequestError("Percentage must be between 0 and 100", nil)
+	}
+	if !checkIfUserIsInRole(e.Auth, "manager") {
+		return e.UnauthorizedError("Unauthorized", nil)
+	}
+
+	return e.App.RunInTransaction(func(tx core.App) error {
+		changeData := []ChangeTokens{}
+		userRecords, err := tx.FindAllRecords("users")
+		if err != nil {
+			return e.BadRequestError("Error finding users", err)
+		}
+		for _, userRecord := range userRecords {
+			if userRecord.GetInt("reservedTokens") > 0 {
+				return e.BadRequestError("User has reserved tokens", nil)
+			}
+			currentTokens := userRecord.GetInt("tokens")
+			removedAmountFloat := float64(currentTokens) * (float64(data.Percentage) / 100)
+			removedAmount := int(math.Ceil(removedAmountFloat))
+			userRecord.Set("tokens", currentTokens-removedAmount)
+			if err := tx.Save(userRecord); err != nil {
+				return e.BadRequestError("Error saving user", err)
+			}
+			if err := createTransactionRecord(tx, userRecord.Id, -removedAmount, "Token percentage removal", e.Auth.Id); err != nil {
+				return e.BadRequestError("Failed to create transaction record", err)
+			}
+			changeData = append(changeData, ChangeTokens{userRecord.Id, -removedAmount})
+
+		}
+		for _, r := range changeData {
+			notifyUser(r.User, fmt.Sprintf("Your tokens have been updated by %d", r.Amount))
+		}
+		return e.JSON(200, map[string]interface{}{
+			"success": true,
+			"changes": changeData,
+		})
 	})
 }

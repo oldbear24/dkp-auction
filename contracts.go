@@ -15,3 +15,8 @@ type TokenHealtCheckUser struct {
 	TransactionTokens int    `json:"transactionTokens"`
 	Differece         int    `json:"differece"`
 }
+
+type ChangeTokens struct {
+	User   string `json:"user"`
+	Amount int    `json:"amount"`
+}

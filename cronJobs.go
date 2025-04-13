@@ -33,22 +33,18 @@ func finishAuction(app *pocketbase.PocketBase) error {
 			resultRecord := core.NewRecord(coll)
 			resultRecord.Set("auction", record.Id)
 
-			if record.GetString("winner") != "" {
+			userRecord, err := tx.FindRecordById("users", record.GetString("winner"))
+			if err != nil {
+				return err
+			}
 
-				userRecord, err := tx.FindRecordById("users", record.GetString("winner"))
-				if err != nil {
-					return err
-				}
-
-				userRecord.Set("reservedTokens", userRecord.GetInt("reservedTokens")-record.GetInt("currentBid"))
-				userRecord.Set("tokens", userRecord.GetInt("tokens")-record.GetInt("currentBid"))
-				if err := createTransactionRecord(tx, userRecord.Id, -record.GetInt("currentBid"), "Win in auction", ""); err != nil {
-					return err
-				}
-				if err := tx.Save(userRecord); err != nil {
-					return err
-				}
-				notifyUser(userRecord.Id, "You won the auction")
+			userRecord.Set("reservedTokens", userRecord.GetInt("reservedTokens")-record.GetInt("currentBid"))
+			userRecord.Set("tokens", userRecord.GetInt("tokens")-record.GetInt("currentBid"))
+			if err := createTransactionRecord(tx, userRecord.Id, -record.GetInt("currentBid"), "Win in auction", ""); err != nil {
+				return err
+			}
+			if err := tx.Save(userRecord); err != nil {
+				return err
 			}
 
 			err = tx.Save(record)
@@ -58,7 +54,10 @@ func finishAuction(app *pocketbase.PocketBase) error {
 			if err := tx.Save(resultRecord); err != nil {
 				return err
 			}
+			if record.GetString("winner") != "" {
 
+				notifyUser(userRecord.Id, "You won the auction")
+			}
 			notifyRole("manager", "Auction has ended")
 		}
 		return nil

@@ -175,7 +175,12 @@ func handleBid(e *core.RequestEvent) error {
 			return e.BadRequestError("Error checking existing bids", err)
 		}
 		// 5. Check user balance
-		availableTokens := user.GetInt("tokens") - (user.GetInt("reservedTokens") - existinBidForCompare)
+		availableTokens := 0
+		if e.Auth.Id == auction.GetString("winner") {
+			availableTokens = user.GetInt("tokens") - user.GetInt("reservedTokens") + existinBidForCompare
+		} else {
+			availableTokens = user.GetInt("tokens") - user.GetInt("reservedTokens")
+		}
 		e.App.Logger().Debug("Bid tokens", "user", user.GetInt("tokens"), "res", user.GetInt("reservedTokens"), "exBid", existinBidForCompare, "all", availableTokens)
 		if bidData.Amount > availableTokens {
 			return e.BadRequestError("Insufficient tokens", nil)
@@ -193,6 +198,8 @@ func handleBid(e *core.RequestEvent) error {
 			bidRecord = core.NewRecord(collection)
 			bidRecord.Set("auction", auctionId)
 			bidRecord.Set("user", e.Auth.Id)
+		} else {
+			bidRecord = existingBids[0]
 		}
 
 		// 8. Update bid and user records
@@ -201,7 +208,7 @@ func handleBid(e *core.RequestEvent) error {
 
 		//Reset previsou winner tokens
 		previsousWinnerId := auction.GetString("winner")
-		if previsousWinnerId != "" {
+		if previsousWinnerId != "" && previsousWinnerId != e.Auth.Id {
 			previsousWinner, err := tx.FindRecordById("users", previsousWinnerId)
 			if err != nil {
 				return e.BadRequestError("Error finding previous winner", err)
@@ -210,12 +217,16 @@ func handleBid(e *core.RequestEvent) error {
 			if err := tx.Save(previsousWinner); err != nil {
 				return e.BadRequestError("Error saving previous winner", err)
 			}
-			if previsousWinnerId != e.Auth.Id {
-				// Notify previous winner
-				notifyUser(previsousWinner.Id, fmt.Sprintf("Your bid was outbid by %d tokens", bidData.Amount))
-			}
+			// Notify previous winner
+			notifyUser(previsousWinner.Id, fmt.Sprintf("Your bid was outbid by %d tokens", bidData.Amount))
 		}
-		user.Set("reservedTokens", user.GetInt("reservedTokens")+bidData.Amount-existinBidForCompare)
+		tokensToReserve := 0
+		if e.Auth.Id == auction.GetString("winner") {
+			tokensToReserve = bidData.Amount - existinBidForCompare
+		} else {
+			tokensToReserve = bidData.Amount
+		}
+		user.Set("reservedTokens", user.GetInt("reservedTokens")+tokensToReserve)
 		auction.Set("currentBid", bidData.Amount)
 		auction.Set("winner", e.Auth.Id)
 

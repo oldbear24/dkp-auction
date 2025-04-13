@@ -203,6 +203,22 @@ func handleBid(e *core.RequestEvent) error {
 		bidRecord.Set("amount", bidData.Amount)
 		bidRecord.Set("timestamp", time.Now().Unix())
 
+		//Reset previsou winner tokens
+		previsousWinnerId := auction.GetString("winner")
+		if previsousWinnerId != "" {
+			previsousWinner, err := tx.FindRecordById("users", previsousWinnerId)
+			if err != nil {
+				return e.BadRequestError("Error finding previous winner", err)
+			}
+			previsousWinner.Set("reservedTokens", previsousWinner.GetInt("reservedTokens")-auction.GetInt("currentBid"))
+			if err := tx.Save(previsousWinner); err != nil {
+				return e.BadRequestError("Error saving previous winner", err)
+			}
+			if previsousWinnerId != e.Auth.Id {
+				// Notify previous winner
+				notifyUser(previsousWinner.Id, fmt.Sprintf("Your bid was outbid by %d tokens", bidData.Amount))
+			}
+		}
 		user.Set("reservedTokens", user.GetInt("reservedTokens")+bidData.Amount)
 		auction.Set("currentBid", bidData.Amount)
 		auction.Set("winner", e.Auth.Id)

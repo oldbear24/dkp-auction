@@ -185,11 +185,7 @@ func handleBid(e *core.RequestEvent) error {
 
 		// 7. Create or update bid
 		var bidRecord *core.Record
-		if len(existingBids) > 0 {
-			bidRecord = existingBids[0]
-			previousAmount := bidRecord.GetInt("amount")
-			user.Set("reservedTokens", user.GetInt("reservedTokens")-previousAmount)
-		} else {
+		if len(existingBids) == 0 {
 			collection, err := tx.FindCachedCollectionByNameOrId("bids")
 			if err != nil {
 				return e.BadRequestError("Error creating bid", err)
@@ -219,7 +215,7 @@ func handleBid(e *core.RequestEvent) error {
 				notifyUser(previsousWinner.Id, fmt.Sprintf("Your bid was outbid by %d tokens", bidData.Amount))
 			}
 		}
-		user.Set("reservedTokens", user.GetInt("reservedTokens")+bidData.Amount)
+		user.Set("reservedTokens", user.GetInt("reservedTokens")+bidData.Amount-existinBidForCompare)
 		auction.Set("currentBid", bidData.Amount)
 		auction.Set("winner", e.Auth.Id)
 

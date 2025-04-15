@@ -129,7 +129,10 @@ func handleBid(e *core.RequestEvent) error {
 	if auctionId == "" {
 		return e.BadRequestError("Auction ID is required", nil)
 	}
-
+	settings, err := GetSettings(e.App)
+	if err != nil {
+		return e.BadRequestError("Error getting settings", err)
+	}
 	return e.App.RunInTransaction(func(tx core.App) error {
 		// 1. Get auction
 		auction, err := tx.FindRecordById("auctions", auctionId)
@@ -229,6 +232,12 @@ func handleBid(e *core.RequestEvent) error {
 		user.Set("reservedTokens", user.GetInt("reservedTokens")+tokensToReserve)
 		auction.Set("currentBid", bidData.Amount)
 		auction.Set("winner", e.Auth.Id)
+		if settings.EnableFloatingEndOfAuction {
+			newEndTime := time.Now().UTC().Add(time.Minute * time.Duration(settings.FloatingEndOfAuctionMinutes))
+			if newEndTime.After(auction.GetDateTime("endTime").Time()) {
+				auction.Set("endTime", newEndTime)
+			}
+		}
 
 		// 9. Save all changes
 		if err := tx.Save(bidRecord); err != nil {

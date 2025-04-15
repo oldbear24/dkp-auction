@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -67,22 +66,15 @@ func finishAuction(app *pocketbase.PocketBase) error {
 }
 
 func updateUserNames(app *pocketbase.PocketBase) error {
-	settingsArray, err := app.FindAllRecords("settings")
+	settings, err := GetSettings(app)
 	if err != nil {
 		return err
 	}
-	if len(settingsArray) == 0 {
-		return errors.New("settings error does not exists")
-	}
-	settings := settingsArray[0]
-	if !settings.GetBool("nameSynchronization") {
-		return nil
-	}
-	if settings.GetString("synchronizationType") == "tlgh" {
-		baseUrl := settings.GetString("synchronizationUrl")
-		clientId := settings.GetString("synchronizationClient")
-		pass := settings.GetString("synchronizationPassword")
-		guildId := settings.GetString("synchronizationDiscordGuildId")
+	if settings.SynchronizationType == "tlgh" {
+		baseUrl := settings.SynchronizationUrl
+		clientId := settings.SynchronizationClient
+		pass := settings.SynchronizationPassword
+		guildId := settings.SynchronizationDiscordGuildId
 		var loginData struct {
 			Identity string `json:"identity"`
 			Password string `json:"password"`

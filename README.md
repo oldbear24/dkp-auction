@@ -1,3 +1,4 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/oldbear24/dkp-auction)](https://goreportcard.com/report/github.com/oldbear24/dkp-auction)
 # DKP Auction House
 
 DKP Auction House is a PocketBase application for managing auctions and bids in a DKP (Dragon Kill Points) system.

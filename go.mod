@@ -1,6 +1,6 @@
 module github.com/oldbear24/dkp-auction
 
-go 1.24.1
+go 1.24.2
 
 require (
 	github.com/pocketbase/dbx v1.11.0

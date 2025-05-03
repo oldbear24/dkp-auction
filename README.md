@@ -14,7 +14,7 @@ DKP Auction House is a PocketBase application for managing auctions and bids in 
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/dkp-auction.git
+    git clone https://github.com/oldbear24/dkp-auction.git
     cd dkp-auction
     ```
 

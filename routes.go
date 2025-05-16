@@ -116,7 +116,7 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 
 		}
 		for _, r := range data.UserIds {
-			notifyUser(r, fmt.Sprintf("Your tokens have been updated by %d. Reason:%s", data.Amount, message))
+			notifyUser(r, fmt.Sprintf("Your tokens have been updated by %d. Reason: %s", data.Amount, message))
 		}
 		return e.JSON(200, map[string]interface{}{
 			"success": true,

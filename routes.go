@@ -72,6 +72,7 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 	var data struct {
 		UserIds []string `json:"userIds"`
 		Amount  int      `json:"amount"`
+		Reason  string   `json:"reason"`
 	}
 
 	if err := e.BindBody(&data); err != nil {
@@ -81,6 +82,16 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 	if !checkIfUserIsInRole(e.Auth, "manager") {
 		return e.UnauthorizedError("Unauthorized", nil)
 
+	}
+	message := ""
+	if data.Reason != "" {
+		message = data.Reason
+	} else {
+		if data.Amount > 0 {
+			message = "Token top-up"
+		} else {
+			message = "Token deduction"
+		}
 	}
 	return e.App.RunInTransaction(func(tx core.App) error {
 		for _, userId := range data.UserIds {
@@ -98,12 +109,6 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 			if err := tx.Save(user); err != nil {
 				return e.BadRequestError("Error saving user", err)
 			}
-			message := ""
-			if data.Amount > 0 {
-				message = "Token top-up"
-			} else {
-				message = "Token deduction"
-			}
 
 			if err := createTransactionRecord(tx, user.Id, data.Amount, message, e.Auth.Id); err != nil {
 				return e.BadRequestError("Failed to create transaction record", err)
@@ -111,7 +116,7 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 
 		}
 		for _, r := range data.UserIds {
-			notifyUser(r, fmt.Sprintf("Your tokens have been updated by %d", data.Amount))
+			notifyUser(r, fmt.Sprintf("Your tokens have been updated by %d. Reason:%s", data.Amount, message))
 		}
 		return e.JSON(200, map[string]interface{}{
 			"success": true,

@@ -30,6 +30,8 @@ type Settings struct {
 	SynchronizationDiscordGuildId string `db:"synchronizationDiscordGuildId"`
 	EnableFloatingEndOfAuction    bool   `db:"enableFloatingEndOfAuction"`
 	FloatingEndOfAuctionMinutes   int    `db:"floatingEndOfAuctionMinutes"`
+	EnableTLDBAdapterSync         bool   `db:"enableTLDBAdapterSync"`
+	TldbAdapterUrl                string `db:"tldbAdapterUrl"`
 }
 
 type TLDBAdapterResponse struct {

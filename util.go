@@ -44,6 +44,8 @@ func GetSettings(app core.App) (*Settings, error) {
 				SynchronizationDiscordGuildId: "",
 				EnableFloatingEndOfAuction:    false,
 				FloatingEndOfAuctionMinutes:   0,
+				EnableTLDBAdapterSync:         false,
+				TldbAdapterUrl:                "",
 			}
 			if _, err := app.DB().Insert("settings", dbx.Params{}).Execute(); err != nil {
 				return nil, err

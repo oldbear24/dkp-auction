@@ -227,13 +227,21 @@ func runTokenHealthCheck(app *pocketbase.PocketBase) error {
 }
 
 func getTLDBItems(app *pocketbase.PocketBase) error {
-	/*settings, err := GetSettings(app)
+	settings, err := GetSettings(app)
 	if err != nil {
 		return err
-	}*/
+	}
+	if !settings.EnableTLDBAdapterSync {
+		app.Logger().Info("TLDB Adapter Sync is disabled in settings")
+		return nil
+	}
 	httpClient := &http.Client{}
 
-	req, err := http.NewRequest("GET", "http://cc4osss0s044wssggks84ws8.37.205.12.23.sslip.io/api/data", nil)
+	url, err := url.JoinPath(settings.TldbAdapterUrl, "/api/data")
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}

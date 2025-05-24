@@ -3,13 +3,16 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/filesystem"
 )
 
 func finishAuction(app *pocketbase.PocketBase) error {
@@ -220,5 +223,83 @@ func runTokenHealthCheck(app *pocketbase.PocketBase) error {
 	if isError {
 		notifyRole("admin", "Token health check failed")
 	}
+	return nil
+}
+
+func getTLDBItems(app *pocketbase.PocketBase) error {
+	/*settings, err := GetSettings(app)
+	if err != nil {
+		return err
+	}*/
+	httpClient := &http.Client{}
+
+	req, err := http.NewRequest("GET", "http://cc4osss0s044wssggks84ws8.37.205.12.23.sslip.io/api/data", nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("User-Agent", "PocketBase/1.0")
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to fetch TLDB items, status code: %d", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	var response TLDBAdapterResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return err
+	}
+
+	coll, err := app.FindCachedCollectionByNameOrId("items")
+	if err != nil {
+		return err
+	}
+	for _, item := range response.Items {
+		formatedId := strings.ReplaceAll(item.Id, "_", "")
+
+		record, err := app.FindRecordById("items", formatedId)
+		if err != nil {
+			record = core.NewRecord(coll)
+		}
+		record.Set("id", formatedId)
+		record.Set("name", item.Name)
+		iconUrlPart := strings.ToLower(item.Icon)
+		reqImg, err := http.NewRequest("GET", "https://cdn.tldb.info/db/images/ags/v24/256/"+iconUrlPart+".png", nil)
+		if err != nil {
+			return err
+		}
+		reqImg.Header.Add("User-Agent", "PocketBase/1.0")
+		respImg, err := httpClient.Do(reqImg)
+		if err != nil {
+			return err
+		}
+		if respImg.StatusCode != http.StatusOK {
+			return fmt.Errorf("failed to fetch item icon, status code: %d", respImg.StatusCode)
+		}
+		defer respImg.Body.Close()
+		imgData, err := io.ReadAll(respImg.Body)
+		if err != nil {
+			return err
+		}
+
+		f, err := filesystem.NewFileFromBytes(imgData, formatedId+".png")
+		if err != nil {
+			return err
+		}
+
+		record.Set("icon", f)
+		if err := app.Save(record); err != nil {
+			return err
+		}
+	}
+	// Notify that items have been updated
+	notifyRole("admin", "Items have been updated from TLDB")
+
 	return nil
 }

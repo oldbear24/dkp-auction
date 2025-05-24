@@ -31,3 +31,12 @@ type Settings struct {
 	EnableFloatingEndOfAuction    bool   `db:"enableFloatingEndOfAuction"`
 	FloatingEndOfAuctionMinutes   int    `db:"floatingEndOfAuctionMinutes"`
 }
+
+type TLDBAdapterResponse struct {
+	Items []TLDBAdapterItem `json:"items"`
+}
+type TLDBAdapterItem struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
+}

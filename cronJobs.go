@@ -269,7 +269,7 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 		return err
 	}
 	for _, item := range response.Items {
-		if strings.HasPrefix(item.Name, "Extract:") {
+		if strings.HasPrefix(item.Name, "Extract:") || strings.HasPrefix(item.Name, "Precious Lithograph:") {
 			continue // Skip items that are extracts
 		}
 		formatedId := strings.ReplaceAll(item.Id, "_", "")

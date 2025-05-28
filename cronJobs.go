@@ -269,6 +269,9 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 		return err
 	}
 	for _, item := range response.Items {
+		if strings.HasPrefix(item.Name, "Extract:") {
+			continue // Skip items that are extracts
+		}
 		formatedId := strings.ReplaceAll(item.Id, "_", "")
 
 		record, err := app.FindRecordById("items", formatedId)

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -11,6 +13,7 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+	"github.com/pocketbase/pocketbase/tools/filesystem"
 	"github.com/pocketbase/pocketbase/tools/subscriptions"
 	"golang.org/x/sync/errgroup"
 )
@@ -83,6 +86,36 @@ func main() {
 	app.OnRecordCreate("auctions").BindFunc(func(e *core.RecordEvent) error {
 		if e.Record.GetString("state") == "" {
 			e.Record.Set("state", "ongoing")
+		}
+		if e.Record.GetString("mainImage") == "" {
+			rec, err := e.App.FindFirstRecordByData("items", "name", e.Record.GetString("itemName"))
+			if err == nil {
+				itemImageKey := rec.BaseFilesPath() + "/" + rec.GetString("icon")
+				fsys, err := app.NewFilesystem()
+				if err != nil {
+					return err
+				}
+				defer fsys.Close()
+				r, err := fsys.GetReader(itemImageKey)
+				if err != nil {
+					return err
+				}
+				defer r.Close()
+				content := new(bytes.Buffer)
+				_, err = io.Copy(content, r)
+				if err != nil {
+					return err
+				}
+				fileData, err := io.ReadAll(content)
+				if err != nil {
+					return err
+				}
+				f, err := filesystem.NewFileFromBytes(fileData, rec.GetString("icon"))
+				if err != nil {
+					return err
+				}
+				e.Record.Set("mainImage", f)
+			}
 		}
 		return e.Next()
 	})

@@ -290,21 +290,23 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 		if err != nil {
 			return err
 		}
-		if respImg.StatusCode != http.StatusOK {
-			return fmt.Errorf("failed to fetch item icon, status code: %d", respImg.StatusCode)
-		}
-		defer respImg.Body.Close()
-		imgData, err := io.ReadAll(respImg.Body)
-		if err != nil {
-			return err
+		if respImg.StatusCode == http.StatusOK {
+			defer respImg.Body.Close()
+			imgData, err := io.ReadAll(respImg.Body)
+			if err != nil {
+				return err
+			}
+
+			f, err := filesystem.NewFileFromBytes(imgData, formatedId+".png")
+			if err != nil {
+				return err
+			}
+
+			record.Set("icon", f)
+		} else {
+			app.Logger().Error("Failed to fetch item icon for %s, status code: %d", item.Name, respImg.StatusCode)
 		}
 
-		f, err := filesystem.NewFileFromBytes(imgData, formatedId+".png")
-		if err != nil {
-			return err
-		}
-
-		record.Set("icon", f)
 		if err := app.Save(record); err != nil {
 			return err
 		}

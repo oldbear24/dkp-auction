@@ -36,7 +36,7 @@ func main() {
 			app.Logger().Error("runTokenHealthCheck error", "error", err)
 		}
 	})
-	app.Cron().MustAdd("getTLDBItems", "0 2 3 * *", func() {
+	app.Cron().MustAdd("getTLDBItems", "0 2 * * 7", func() {
 		if err := getTLDBItems(app); err != nil {
 			app.Logger().Error("getTLDBItems error", "error", err)
 		}

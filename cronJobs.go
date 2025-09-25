@@ -305,7 +305,7 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 
 			record.Set("icon", f)
 		} else {
-			app.Logger().Error("Failed to fetch item icon.","IconName", item.Name,"StatusCode", respImg.StatusCode,"Url":url)
+			app.Logger().Error("Failed to fetch item icon.", "IconName", item.Name, "StatusCode", respImg.StatusCode, "Url", url)
 		}
 
 		if err := app.Save(record); err != nil {

@@ -281,8 +281,10 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 		record.Set("id", formatedId)
 		record.Set("name", item.Name)
 		iconUrlPart := strings.ToLower(item.Icon)
-		reqImg, err := http.NewRequest("GET", "https://cdn.tldb.info/db/images/ags/v35/256/"+iconUrlPart+".png", nil)
-		if err != nil {
+
+		url := "https://cdn.tldb.info/db/images/ags/v35/256/"+iconUrlPart+".png"
+		reqImg, err := http.NewRequest("GET", url, nil)
+  	if err != nil {
 			return err
 		}
 		reqImg.Header.Add("User-Agent", "PocketBase/1.0")
@@ -304,7 +306,7 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 
 			record.Set("icon", f)
 		} else {
-			app.Logger().Error("Failed to fetch item icon for %s, status code: %d", item.Name, respImg.StatusCode)
+			app.Logger().Error("Failed to fetch item icon.", "IconName", item.Name, "StatusCode", respImg.StatusCode, "Url", url)
 		}
 
 		if err := app.Save(record); err != nil {

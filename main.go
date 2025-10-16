@@ -14,6 +14,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 	"github.com/pocketbase/pocketbase/tools/filesystem"
+	"github.com/pocketbase/pocketbase/tools/security"
 	"github.com/pocketbase/pocketbase/tools/subscriptions"
 	"golang.org/x/sync/errgroup"
 )
@@ -62,6 +63,7 @@ func main() {
 			return e.Next()
 		})
 		RegisterRoutes(se)
+		RegisterApiRoutes(se)
 		return se.Next()
 	})
 	app.OnRecordAuthWithOAuth2Request("users").BindFunc(func(e *core.RecordAuthWithOAuth2RequestEvent) error {
@@ -73,6 +75,10 @@ func main() {
 		if e.Record.GetString("role") == "" {
 			e.Record.Set("role", "member")
 		}
+		return e.Next()
+	})
+	app.OnRecordCreate("apiKeys").BindFunc(func(e *core.RecordEvent) error {
+		e.Record.Set("apiKey", security.RandomString(250))
 		return e.Next()
 	})
 	app.OnRecordAfterUpdateSuccess("users").BindFunc(func(e *core.RecordEvent) error {

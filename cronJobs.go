@@ -280,11 +280,12 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 		}
 		record.Set("id", formatedId)
 		record.Set("name", item.Name)
+		record.Set("rarity", TranslateRarity(item.Rarity))
 		iconUrlPart := strings.ToLower(item.Icon)
 
-		url := "https://cdn.tldb.info/db/images/ags/v35/256/"+iconUrlPart+".png"
+		url := "https://cdn.tldb.info/db/images/ags/v35/256/" + iconUrlPart + ".png"
 		reqImg, err := http.NewRequest("GET", url, nil)
-  	if err != nil {
+		if err != nil {
 			return err
 		}
 		reqImg.Header.Add("User-Agent", "PocketBase/1.0")

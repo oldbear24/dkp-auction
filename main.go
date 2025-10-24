@@ -121,6 +121,7 @@ func main() {
 					return err
 				}
 				e.Record.Set("mainImage", f)
+				e.Record.Set("rarity", rec.Get("rarity"))
 			}
 		}
 		return e.Next()

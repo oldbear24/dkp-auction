@@ -58,3 +58,25 @@ func GetSettings(app core.App) (*Settings, error) {
 	}
 	return settings, nil
 }
+
+func TranslateRarity(rarity int) string {
+	switch rarity {
+	case 3:
+		return "common"
+	case 4:
+		return "uncommon"
+	case 5:
+		return "rare"
+	case 6:
+		return "rare_t2"
+	case 10:
+		return "epic"
+	case 11:
+		return "epic_t2"
+	case 12:
+		return "epic_t3"
+
+	default:
+		return ""
+	}
+}

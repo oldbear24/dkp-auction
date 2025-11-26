@@ -37,6 +37,38 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run tests
+        run: |
+          set -euo pipefail
+          go test -json ./... | tee test.json
+
+      - name: Summarize test results
+        if: always()
+        run: |
+          set -euo pipefail
+          pass_count=$(jq -s '[.[] | select(.Test? and .Action=="pass")] | length' test.json)
+          fail_count=$(jq -s '[.[] | select(.Test? and .Action=="fail")] | length' test.json)
+          total=$((pass_count + fail_count))
+
+          {
+            echo "### Go test results"
+            echo
+            echo "| Test | Package | Result |"
+            echo "| --- | --- | --- |"
+            jq -r 'select(.Test? and (.Action=="pass" or .Action=="fail")) | "\(.Test)\t\(.Package)\t\(.Action)"' test.json \
+              | sort \
+              | while IFS=$'\t' read -r test pkg status; do
+                  printf '| `%s` | `%s` | %s |\n' "$test" "$pkg" "${status^^}"
+                done
+            echo
+            echo "**Totals:** ${pass_count} passed / ${fail_count} failed / ${total} total"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign

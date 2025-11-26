@@ -51,8 +51,8 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          pass_count=$(jq '[. | select(.Test? and .Action=="pass")] | length' test.json)
-          fail_count=$(jq '[. | select(.Test? and .Action=="fail")] | length' test.json)
+          pass_count=$(jq -s '[.[] | select(.Test? and .Action=="pass")] | length' test.json)
+          fail_count=$(jq -s '[.[] | select(.Test? and .Action=="fail")] | length' test.json)
           total=$((pass_count + fail_count))
 
           {

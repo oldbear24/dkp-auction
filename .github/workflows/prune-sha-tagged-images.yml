@@ -1,0 +1,68 @@
+name: Prune SHA-only GHCR images
+
+on:
+  schedule:
+    - cron: "0 5 * * 1" # Mondays at 05:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  prune-ghcr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GH_TOKEN}" | gh auth login --with-token
+
+      - name: Delete versions with only SHA tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PACKAGE_NAME: ${{ vars.GHCR_PACKAGE_NAME }}
+          SHA_TAG_REGEX: ${{ vars.SHA_TAG_REGEX }}
+        run: |
+          set -euo pipefail
+
+          OWNER_TYPE=$(gh api "/users/${OWNER}" --jq .type)
+          if [[ "${OWNER_TYPE}" == "Organization" ]]; then
+            BASE_PATH="orgs/${OWNER}"
+          else
+            BASE_PATH="users/${OWNER}"
+          fi
+
+          PACKAGE_NAME=$(echo "${PACKAGE_NAME:-${REPO}}" | tr '[:upper:]' '[:lower:]')
+          # Default regex matches commit SHAs as well as digest-style tags like
+          # sha256-<64 hex>[.sig]
+          SHA_TAG_REGEX=${SHA_TAG_REGEX:-'^([0-9a-f]{7,40}|sha256-[0-9a-f]{64}(\\.sig)?)$'}
+
+          echo "Fetching versions for package ${PACKAGE_NAME} under ${BASE_PATH}"
+          if ! VERSIONS_JSON=$(gh api -H "Accept: application/vnd.github+json" --paginate \
+            "/${BASE_PATH}/packages/container/${PACKAGE_NAME}/versions?per_page=100"); then
+            echo "Container package not found; skipping cleanup."
+            exit 0
+          fi
+
+          DELETE_IDS=$(echo "${VERSIONS_JSON}" | jq -r \
+            --arg regex "${SHA_TAG_REGEX}" \
+            '.[] | select((.metadata.container.tags | length > 0) and ([.metadata.container.tags[] | test($regex)] | all)) | .id')
+
+          if [[ -z "${DELETE_IDS}" ]]; then
+            echo "No versions found that are tagged only with commit SHAs."
+            exit 0
+          fi
+
+          while IFS= read -r VERSION_ID; do
+            [[ -z "${VERSION_ID}" ]] && continue
+            echo "Deleting container version ID ${VERSION_ID}"
+            gh api -X DELETE "/${BASE_PATH}/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
+          done <<< "${DELETE_IDS}"
+
+          echo "Cleanup complete."

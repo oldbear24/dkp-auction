@@ -1,10 +1,6 @@
 import PocketBase, { type RecordModel } from 'pocketbase';
-import { env } from '$env/dynamic/public';
 
-const PUBLIC_API_URL = env.PUBLIC_API_URL;
-
-console.log('API URL:', PUBLIC_API_URL);
-const pb = new PocketBase(PUBLIC_API_URL); // Replace with your PocketBase URL
+const pb = new PocketBase(window.location.origin); // Replace with your PocketBase URL
 pb.autoCancellation(false);
 
 export async function subscribeToAuctionUpdate(recordId: string, callback: (record: RecordModel) => void) {

@@ -12,10 +12,10 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint ."
 	},
-	"devDependencies": {
+    "devDependencies": {
 		"@eslint/compat": "^2.0.0",
 		"@eslint/js": "^9.39.2",
-		"@sveltejs/adapter-auto": "^7.0.0",
+		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.49.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
 		"autoprefixer": "^10.4.23",
@@ -35,8 +35,6 @@
 		"vite": "^7.3.0"
 	},
 	"dependencies": {
-		"@sveltejs/adapter-node": "^5.2.12",
-		"@sveltejs/adapter-static": "^3.0.8",
 		"@tailwindcss/postcss": "^4.1.18",
 		"@tailwindcss/vite": "^4.1.18",
 		"dotenv": "^17.2.3",

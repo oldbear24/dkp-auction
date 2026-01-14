@@ -9,9 +9,8 @@ RUN go build -o /go/bin/app -v .
 #web build stage
 FROM node:lts-alpine AS builder-web
 WORKDIR /usr/src/app
-COPY package.json package-lock.json ./ 
-RUN npm ci
 COPY ./web .
+RUN npm ci
 RUN npm run build
 
 #final stage

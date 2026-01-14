@@ -9,3 +9,19 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Prague"
+    groups:
+      all-deps:
+        patterns:
+          - "*"            # match every dependency
+  - package-ecosystem: "npm"
+    directory: "/web/"
+    schedule:
+      interval: "daily"   # or "daily", "monthly"
+      time: "09:00"
+      timezone: "Europe/Prague"
+    groups:
+      all-deps:
+        patterns:
+          - "*"            # match every dependency

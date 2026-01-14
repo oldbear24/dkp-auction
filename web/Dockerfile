@@ -1,35 +1,32 @@
-# Stage 1: Build the project
+# Stage 1: Build the static site
 FROM node:lts-alpine AS build
 
 # Set the working directory
 WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json ./ 
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the application code
 COPY . .
 
-# Build the application
+# Build the application (produces static files in build/)
 RUN npm run build
 
-# Stage 2: Run the project
-FROM node:lts-alpine
+# Stage 2: Serve the static files with nginx
+FROM nginx:alpine
 
-# Set the working directory
-WORKDIR /usr/src/app
+# Copy the built static files to nginx html directory
+COPY --from=build /usr/src/app/build /usr/share/nginx/html
 
-# Copy only the necessary files from the build stage
-COPY --from=build /usr/src/app/package.json ./
-COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/build ./build
-COPY --from=build /usr/src/app/static ./static
+# Copy custom nginx config if needed (optional)
+# COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Expose port 80
+EXPOSE 80
 
-# Run the application
-CMD ["node", "build"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

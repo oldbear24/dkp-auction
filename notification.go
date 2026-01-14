@@ -46,7 +46,7 @@ func createNotification(app core.App, userId string, message string) error {
 	record := core.NewRecord(coll)
 	record.Set("user", userId)
 	record.Set("text", message)
-	if app.Save(record) != nil {
+	if err := app.Save(record); err != nil {
 		return err
 	}
 	return nil

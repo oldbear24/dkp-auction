@@ -23,7 +23,7 @@ func createTransactionRecord(app core.App, userId string, amount int, note strin
 	record.Set("amount", amount)
 	record.Set("note", note)
 	record.Set("author", authorId)
-	if app.Save(record) != nil {
+	if err := app.Save(record); err != nil {
 		return err
 	}
 	return nil
@@ -34,26 +34,17 @@ func GetSettings(app core.App) (*Settings, error) {
 	err := app.DB().Select("*").From("settings").Limit(1).One(&settings)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			// If no settings are found, create default settings
-			settings = &Settings{
-				NameSynchronization:           false,
-				SynchronizationType:           "",
-				SynchronizationUrl:            "",
-				SynchronizationClient:         "",
-				SynchronizationPassword:       "",
-				SynchronizationDiscordGuildId: "",
-				EnableFloatingEndOfAuction:    false,
-				FloatingEndOfAuctionMinutes:   0,
-				EnableTLDBAdapterSync:         false,
-				TldbAdapterUrl:                "",
-			}
+			// If no settings are found, create a default row then re-query
 			if _, err := app.DB().Insert("settings", dbx.Params{}).Execute(); err != nil {
 				return nil, err
 			}
-		} else {
-			return nil, err
+			// try to read the inserted settings
+			settings = &Settings{}
+			if err := app.DB().Select("*").From("settings").Limit(1).One(&settings); err != nil {
+				return nil, err
+			}
+			return settings, nil
 		}
-
 		return nil, err
 	}
 	return settings, nil

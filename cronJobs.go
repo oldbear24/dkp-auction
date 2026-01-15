@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
@@ -93,12 +94,16 @@ func updateUserNames(app *pocketbase.PocketBase) error {
 		if err != nil {
 			return err
 		}
-		resp, err := http.Post(loginPath, "application/json", dataReader)
+		client := &http.Client{Timeout: 15 * time.Second}
+		resp, err := client.Post(loginPath, "application/json", dataReader)
 
 		if err != nil {
 			return err
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return fmt.Errorf("failed to authenticate with TLGH, status code: %d", resp.StatusCode)
+		}
 
 		var loginResponse struct {
 			Token string `json:"token"`
@@ -121,13 +126,14 @@ func updateUserNames(app *pocketbase.PocketBase) error {
 			return err
 		}
 		req.Header.Add("Authorization", bearer)
-		client := &http.Client{}
-
 		resp2, err := client.Do(req)
 		if err != nil {
 			return err
 		}
 		defer resp2.Body.Close()
+		if resp2.StatusCode != http.StatusOK {
+			return fmt.Errorf("failed to fetch TLGH nicknames, status code: %d", resp2.StatusCode)
+		}
 		type User struct {
 			Id       string `json:"id"`
 			Nickname string `json:"nickname"`
@@ -235,7 +241,7 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 		app.Logger().Info("TLDB Adapter Sync is disabled in settings")
 		return nil
 	}
-	httpClient := &http.Client{}
+	httpClient := &http.Client{Timeout: 20 * time.Second}
 
 	url, err := url.JoinPath(settings.TldbAdapterUrl, "/api/data")
 	if err != nil {
@@ -251,10 +257,10 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to fetch TLDB items, status code: %d", resp.StatusCode)
 	}
-	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -307,6 +313,7 @@ func getTLDBItems(app *pocketbase.PocketBase) error {
 
 			record.Set("icon", f)
 		} else {
+			respImg.Body.Close()
 			app.Logger().Error("Failed to fetch item icon.", "IconName", item.Name, "StatusCode", respImg.StatusCode, "Url", url)
 		}
 

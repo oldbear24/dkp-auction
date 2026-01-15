@@ -16,6 +16,7 @@ import (
 	"github.com/pocketbase/pocketbase/tools/filesystem"
 )
 
+// finishAuction closes expired auctions, updates winners, and posts notifications.
 func finishAuction(app *pocketbase.PocketBase) error {
 	records, err := app.FindRecordsByFilter("auctions", "state = 'ongoing' && endTime < @now", "", 0, 0, nil)
 	if err != nil {
@@ -69,6 +70,7 @@ func finishAuction(app *pocketbase.PocketBase) error {
 	})
 }
 
+// updateUserNames syncs user nicknames from the configured external source.
 func updateUserNames(app *pocketbase.PocketBase) error {
 	settings, err := GetSettings(app)
 	if err != nil {
@@ -170,6 +172,7 @@ func updateUserNames(app *pocketbase.PocketBase) error {
 	return nil
 }
 
+// runTokenHealthCheck reconciles token balances with transactions and stores a report.
 func runTokenHealthCheck(app *pocketbase.PocketBase) error {
 	records, err := app.FindAllRecords("users")
 	if err != nil {
@@ -232,6 +235,7 @@ func runTokenHealthCheck(app *pocketbase.PocketBase) error {
 	return nil
 }
 
+// getTLDBItems fetches item data and icons from TLDB and updates the items collection.
 func getTLDBItems(app *pocketbase.PocketBase) error {
 	settings, err := GetSettings(app)
 	if err != nil {

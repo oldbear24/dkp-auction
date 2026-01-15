@@ -8,6 +8,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
+// TestTranslateRarity verifies known rarity mappings.
 func TestTranslateRarity(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -32,12 +33,14 @@ func TestTranslateRarity(t *testing.T) {
 	}
 }
 
+// TestTranslateRarityUnknown verifies unknown rarity values return empty strings.
 func TestTranslateRarityUnknown(t *testing.T) {
 	if got := TranslateRarity(99); got != "" {
 		t.Fatalf("TranslateRarity(99) = %q, expected empty string", got)
 	}
 }
 
+// TestGetSettingsReturnsStoredRecord ensures settings retrieval returns stored values.
 func TestGetSettingsReturnsStoredRecord(t *testing.T) {
 	app := newTestApp(t)
 
@@ -57,6 +60,7 @@ func TestGetSettingsReturnsStoredRecord(t *testing.T) {
 	}
 }
 
+// TestGetSettingsInsertsDefaultRowWhenMissing ensures defaults are inserted when missing.
 func TestGetSettingsInsertsDefaultRowWhenMissing(t *testing.T) {
 	app := newTestApp(t)
 
@@ -77,6 +81,7 @@ func TestGetSettingsInsertsDefaultRowWhenMissing(t *testing.T) {
 	}
 }
 
+// newTestApp creates a PocketBase instance with migrations for tests.
 func newTestApp(t *testing.T) *pocketbase.PocketBase {
 	t.Helper()
 
@@ -98,6 +103,7 @@ func newTestApp(t *testing.T) *pocketbase.PocketBase {
 	return app
 }
 
+// insertSettingsRecord seeds the settings collection with sample values.
 func insertSettingsRecord(t *testing.T, app *pocketbase.PocketBase) {
 	t.Helper()
 

@@ -20,6 +20,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// main configures and starts the PocketBase application.
 func main() {
 	app := pocketbase.New()
 
@@ -147,6 +148,7 @@ func main() {
 		log.Fatal(err)
 	}
 }
+// notify sends a subscription message to connected clients.
 func notify(app core.App, subscription string, data any) error {
 	rawData, err := json.Marshal(data)
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
+// TestCheckIfUserIsInRole verifies role membership checks.
 func TestCheckIfUserIsInRole(t *testing.T) {
 	app := newTestApp(t)
 
@@ -20,6 +21,7 @@ func TestCheckIfUserIsInRole(t *testing.T) {
 	}
 }
 
+// TestCreateTransactionRecord verifies that transaction records are persisted.
 func TestCreateTransactionRecord(t *testing.T) {
 	app := newTestApp(t)
 
@@ -46,6 +48,7 @@ func TestCreateTransactionRecord(t *testing.T) {
 	}
 }
 
+// createTestUser inserts a user record for use in tests.
 func createTestUser(t *testing.T, app *pocketbase.PocketBase, email string, roles []string) *core.Record {
 	t.Helper()
 

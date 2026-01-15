@@ -34,7 +34,7 @@ func resolveAuction(e *core.RequestEvent) error {
 		return e.BadRequestError("Could not retrieve record", err)
 	}
 	if record.GetBool("resolved") {
-		e.BadRequestError("Record is already resolved!", nil)
+		return e.BadRequestError("Record is already resolved!", nil)
 	}
 	record.Set("resolved", true)
 	record.Set("resolvedBy", e.Auth.Id)
@@ -83,6 +83,12 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 		return e.UnauthorizedError("Unauthorized", nil)
 
 	}
+	if len(data.UserIds) == 0 {
+		return e.BadRequestError("UserIds are required", nil)
+	}
+	if data.Amount == 0 {
+		return e.BadRequestError("Amount cannot be 0", nil)
+	}
 	message := ""
 	if data.Reason != "" {
 		message = data.Reason
@@ -98,9 +104,6 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 			user, err := tx.FindRecordById("users", userId)
 			if err != nil {
 				return e.BadRequestError("User not found", err)
-			}
-			if data.Amount == 0 {
-				return e.BadRequestError("Amount cannot be 0", nil)
 			}
 
 			newAmount := user.GetInt("tokens") + data.Amount
@@ -182,12 +185,12 @@ func handleBid(e *core.RequestEvent) error {
 			0,
 			dbx.Params{"auctionId": auctionId, "userId": e.Auth.Id},
 		)
+		if err != nil {
+			return e.BadRequestError("Error checking existing bids", err)
+		}
 		existinBidForCompare := 0
 		if len(existingBids) > 0 {
 			existinBidForCompare = existingBids[0].GetInt("amount")
-		}
-		if err != nil {
-			return e.BadRequestError("Error checking existing bids", err)
 		}
 		// 5. Check user balance
 		availableTokens := 0

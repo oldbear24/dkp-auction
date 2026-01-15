@@ -58,15 +58,14 @@ func TestGetSettingsReturnsStoredRecord(t *testing.T) {
 }
 
 func TestGetSettingsInsertsDefaultRowWhenMissing(t *testing.T) {
-	t.Skip("Will be fixed later, it is not critical right now")
-	/*app := newTestApp(t)
+	app := newTestApp(t)
 
 	settings, err := GetSettings(app.App)
-	if !errors.Is(err, sql.ErrNoRows) {
-		t.Fatalf("expected sql.ErrNoRows, got %v", err)
+	if err != nil {
+		t.Fatalf("GetSettings returned error: %v", err)
 	}
-	if settings != nil {
-		t.Fatalf("expected nil settings when none exist, got %#v", settings)
+	if settings == nil {
+		t.Fatalf("expected settings to be created, got nil")
 	}
 
 	var count int
@@ -75,7 +74,7 @@ func TestGetSettingsInsertsDefaultRowWhenMissing(t *testing.T) {
 	}
 	if count != 1 {
 		t.Fatalf("expected a single inserted default row, got %d", count)
-	}*/
+	}
 }
 
 func newTestApp(t *testing.T) *pocketbase.PocketBase {

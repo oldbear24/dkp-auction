@@ -5,8 +5,10 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
+// notificationChannel buffers notification payloads for async processing.
 var notificationChannel = make(chan notification, 1024)
 
+// startNotificationWorker consumes queued notifications and persists them.
 func startNotificationWorker(app core.App) {
 	for {
 		n := <-notificationChannel
@@ -31,13 +33,17 @@ func startNotificationWorker(app core.App) {
 	}
 }
 
+// notifyUser enqueues a notification for a specific user.
 func notifyUser(userId string, message string) {
 	notificationChannel <- notification{UserIdOrRole: userId, Message: message, IsRole: false}
 }
+
+// notifyRole enqueues a notification for all users with a role.
 func notifyRole(role string, message string) {
 	notificationChannel <- notification{UserIdOrRole: role, Message: message, IsRole: true}
 }
 
+// createNotification writes a notification record for the given user.
 func createNotification(app core.App, userId string, message string) error {
 	coll, err := app.FindCachedCollectionByNameOrId("notifications")
 	if err != nil {

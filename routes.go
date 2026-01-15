@@ -11,6 +11,7 @@ import (
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
+// RegisterRoutes configures the authenticated API endpoints.
 func RegisterRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/bid/{id}", handleBid).Bind(apis.RequireAuth())
 	se.Router.POST("/api/change-tokens", chaneUsersAmount).Bind(apis.RequireAuth())
@@ -21,6 +22,7 @@ func RegisterRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/clear-tokens", clearTokens).Bind(apis.RequireAuth())
 
 }
+// resolveAuction marks an auction result as resolved.
 func resolveAuction(e *core.RequestEvent) error {
 	if !checkIfUserIsInRole(e.Auth, "manager") {
 		return e.UnauthorizedError("Unauthorized", nil)
@@ -45,6 +47,7 @@ func resolveAuction(e *core.RequestEvent) error {
 		"success": true,
 	})
 }
+// setVerified updates the validated flag for a user.
 func setVerified(e *core.RequestEvent) error {
 	var data struct {
 		Validated bool `json:"validated"`
@@ -68,6 +71,7 @@ func setVerified(e *core.RequestEvent) error {
 	})
 }
 
+// chaneUsersAmount adjusts tokens for one or more users.
 func chaneUsersAmount(e *core.RequestEvent) error {
 	var data struct {
 		UserIds []string `json:"userIds"`
@@ -127,6 +131,7 @@ func chaneUsersAmount(e *core.RequestEvent) error {
 	})
 }
 
+// handleBid validates and records a bid on an auction.
 func handleBid(e *core.RequestEvent) error {
 	var bidData struct {
 		Amount int `json:"amount"`
@@ -272,6 +277,7 @@ func handleBid(e *core.RequestEvent) error {
 	})
 }
 
+// seenNotifications marks all notifications for the current user as seen.
 func seenNotifications(e *core.RequestEvent) error {
 	notifications, err := e.App.FindRecordsByFilter("notifications", "user = {:userId}", "", 0, 0, dbx.Params{"userId": e.Auth.Id})
 	if err != nil {
@@ -288,6 +294,7 @@ func seenNotifications(e *core.RequestEvent) error {
 	})
 
 }
+// seenNotification marks a single notification as seen.
 func seenNotification(e *core.RequestEvent) error {
 	notificationId := e.Request.PathValue("id")
 	if notificationId == "" {
@@ -305,6 +312,7 @@ func seenNotification(e *core.RequestEvent) error {
 		"success": true,
 	})
 }
+// clearTokens removes a percentage of tokens from all users.
 func clearTokens(e *core.RequestEvent) error {
 	var data struct {
 		//UserIds    []string `json:"userIds"`

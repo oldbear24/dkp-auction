@@ -5,16 +5,18 @@ import (
 	"github.com/pocketbase/pocketbase/tools/hook"
 )
 
+// RegisterApiRoutes wires API endpoints and middleware for server-side token operations.
 func RegisterApiRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/app/change-tokens", changeTokensApi).Bind(validateApiTokenMiddleware()).Bind(setUserAuthMiddleware())
 
 }
 
+// changeTokensApi handles token change requests using the shared change handler.
 func changeTokensApi(e *core.RequestEvent) error {
-
 	return chaneUsersAmount(e)
 }
 
+// validateApiToken returns the API token record ID for a valid token string.
 func validateApiToken(app core.App, token string) (string, error) {
 	record, err := app.FindFirstRecordByData("apiKeys", "apiKey", token)
 	if err != nil {
@@ -23,6 +25,7 @@ func validateApiToken(app core.App, token string) (string, error) {
 	return record.Id, nil
 }
 
+// validateApiTokenMiddleware enforces API token validation on protected routes.
 func validateApiTokenMiddleware() *hook.Handler[*core.RequestEvent] {
 	return &hook.Handler[*core.RequestEvent]{
 		Id: "validate-api-token",
@@ -44,6 +47,7 @@ func validateApiTokenMiddleware() *hook.Handler[*core.RequestEvent] {
 	}
 }
 
+// setUserAuthMiddleware resolves a Discord user and sets it as the auth record.
 func setUserAuthMiddleware() *hook.Handler[*core.RequestEvent] {
 	return &hook.Handler[*core.RequestEvent]{
 		Id: "set-auth-user",

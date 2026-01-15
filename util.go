@@ -9,10 +9,12 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
+// checkIfUserIsInRole returns true when the record contains the specified role.
 func checkIfUserIsInRole(record *core.Record, role string) bool {
 	return slices.Contains(record.GetStringSlice("role"), role)
 }
 
+// createTransactionRecord stores a transaction record for the given user and author.
 func createTransactionRecord(app core.App, userId string, amount int, note string, authorId string) error {
 	coll, err := app.FindCachedCollectionByNameOrId("transactions")
 	if err != nil {
@@ -29,6 +31,7 @@ func createTransactionRecord(app core.App, userId string, amount int, note strin
 	return nil
 }
 
+// GetSettings returns the singleton settings record, inserting a default when missing.
 func GetSettings(app core.App) (*Settings, error) {
 	settings := &Settings{}
 	err := app.DB().Select("*").From("settings").Limit(1).One(&settings)
@@ -50,6 +53,7 @@ func GetSettings(app core.App) (*Settings, error) {
 	return settings, nil
 }
 
+// TranslateRarity maps rarity values to their human-readable names.
 func TranslateRarity(rarity int) string {
 	switch rarity {
 	case 3:

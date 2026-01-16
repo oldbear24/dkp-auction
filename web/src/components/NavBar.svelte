@@ -5,6 +5,7 @@
 	import ToastManager from './ToastManager.svelte';
 	import { writable } from 'svelte/store';
 	import NotificationsList from './NotificationsList.svelte';
+	import { appVersion } from '$lib/version';
 	let notificationListComponent: NotificationsList;
 	let notificationCount = writable(0);
   const openNotification = writable(false);
@@ -57,7 +58,8 @@
 		<a class="btn btn-ghost text-xl" href="/">Auction House</a>
 	</div>
 
-	<div class="flex-none pr-3">
+	<div class="flex-none pr-3 flex items-center gap-2">
+		<span class="text-xs opacity-70">v{appVersion.version}</span>
 		{#if $user}
 			<div
 				data-tip="Your current tokens and usable tokens."

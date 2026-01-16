@@ -8,7 +8,12 @@ import (
 // RegisterApiRoutes wires API endpoints and middleware for server-side token operations.
 func RegisterApiRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/app/change-tokens", changeTokensApi).Bind(validateApiTokenMiddleware()).Bind(setUserAuthMiddleware())
+	se.Router.GET("/api/version", appVersion)
 
+}
+
+func appVersion(e *core.RequestEvent) error {
+	return e.JSON(200, versionInfo())
 }
 
 // changeTokensApi handles token change requests using the shared change handler.

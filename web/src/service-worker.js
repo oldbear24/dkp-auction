@@ -1,5 +1,5 @@
 self.addEventListener('install', (event) => {
-  event.waitUntil(
+ /* event.waitUntil(
     caches.open('my-cache').then((cache) => {
       return cache.addAll([
         '/',
@@ -12,7 +12,8 @@ self.addEventListener('install', (event) => {
         '/icons/icon-512x512.png'
       ]);
     })
-  );
+  );*/
+  self.skipWaiting(); 
 });
 
 self.addEventListener('fetch', (event) => {

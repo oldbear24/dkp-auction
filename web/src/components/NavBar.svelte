@@ -59,7 +59,7 @@
 	</div>
 
 	<div class="flex-none pr-3 flex items-center gap-2">
-		<span class="text-xs opacity-70">v{appVersion.version}</span>
+		<span class="text-xs opacity-70">{appVersion.version}</span>
 		{#if $user}
 			<div
 				data-tip="Your current tokens and usable tokens."

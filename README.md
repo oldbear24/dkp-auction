@@ -65,3 +65,19 @@ Migrations are handled via the PocketBase migrate plugin. When running with `go 
 ```sh
 go test ./...
 ```
+
+## Build versioning
+
+The backend and web UI can embed version metadata at build time. The Go binary reads
+`VERSION`, `COMMIT`, and `BUILD_DATE` via linker flags, and the Svelte app reads the same
+values via `VITE_APP_*` env vars in the Docker build.
+
+Example Docker build:
+
+```sh
+docker build \
+  --build-arg VERSION=$(git describe --tags --always) \
+  --build-arg COMMIT=$(git rev-parse --short HEAD) \
+  --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  -t dkp-auction:$(git describe --tags --always) .
+```

@@ -27,7 +27,7 @@
 		filterParts.push('endTime > {:endTime}');
 
 		// Add search query filter if present
-		if (searchQuery != '') {
+		if (searchQuery !== '') {
 			filterParams.searchQuery = searchQuery + '%';
 			filterParts.push('itemName ~ {:searchQuery}');
 		}

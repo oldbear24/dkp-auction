@@ -6,7 +6,8 @@
 	import AuthGuard from '../../components/AuthGuard.svelte';
 
 	let auctionResults = writable<RecordModel[]>([]);
-	const auctionFields = 'id,expand.auction.itemName,expand.auction.description,resolved,expand.resolvedBy.name,created,expand.auction.expand.winner.name';
+	const auctionFields =
+		'id,expand.auction.itemName,expand.auction.description,resolved,expand.resolvedBy.name,created,expand.auction.expand.winner.name';
 	const auctionExpand = 'resolvedBy,auction,auction.winner';
 	let showUnresolvedOnly = writable(true);
 
@@ -19,7 +20,7 @@
 			const response = await pb.collection('auctionsResult').getFullList({
 				sort: '-created',
 				filter: filterQuery,
-				fields:  auctionFields,
+				fields: auctionFields,
 				expand: auctionExpand
 			});
 			console.debug('Filter:', filterQuery);
@@ -39,41 +40,37 @@
 	});
 
 	async function updateTableFromRT(recordSub: RecordSubscription<RecordModel>) {
-        console.debug(recordSub)
+		console.debug(recordSub);
 		switch (recordSub.action) {
 			case 'create':
 				pb.collection('auctionsResult')
-					.getOne(recordSub.record.id, { fields:auctionFields ,expand: auctionExpand })
+					.getOne(recordSub.record.id, { fields: auctionFields, expand: auctionExpand })
 					.then((record) => {
 						auctionResults.set([record, ...$auctionResults]);
 					});
 				break;
 			case 'update':
 				pb.collection('auctionsResult')
-					.getOne(recordSub.record.id, {fields:auctionFields , expand: auctionExpand })
+					.getOne(recordSub.record.id, { fields: auctionFields, expand: auctionExpand })
 					.then((record) => {
 						auctionResults.update((results) =>
-							results.map((result) =>
-								result.id === record.id ? record : result
-							)
+							results.map((result) => (result.id === record.id ? record : result))
 						);
 					});
-                    break;
+				break;
 			case 'delete':
 				auctionResults.set($auctionResults.filter((result) => result.id !== recordSub.record.id));
 			default:
 		}
 	}
-	function resolveAuction(id:string,isResolved:true) {
-		if(isResolved)return
-		try
-		{
-			pb.send("/api/resolve-auction/"+id,{
-				method:"POST"
-			})
-		}
-		catch(err){
-			console.error(err)
+	function resolveAuction(id: string, isResolved: true) {
+		if (isResolved) return;
+		try {
+			pb.send('/api/resolve-auction/' + id, {
+				method: 'POST'
+			});
+		} catch (err) {
+			console.error(err);
 		}
 	}
 </script>
@@ -115,7 +112,7 @@
 								type="checkbox"
 								checked={result.resolved}
 								class="toggle text-error checked:text-success"
-								on:click={()=>resolveAuction(result.id,result.resolved)}
+								on:click={() => resolveAuction(result.id, result.resolved)}
 								disabled={result.resolved}
 							/></td
 						>

@@ -8,7 +8,7 @@
 	import { appVersion } from '$lib/version';
 	let notificationListComponent: NotificationsList;
 	let notificationCount = writable(0);
-  const openNotification = writable(false);
+	const openNotification = writable(false);
 	async function loginWithDiscord() {
 		try {
 			unsubscribeFromUserUpdates();
@@ -58,7 +58,7 @@
 		<a class="btn btn-ghost text-xl" href="/">Auction House</a>
 	</div>
 
-	<div class="flex-none pr-3 flex items-center gap-2">
+	<div class="flex flex-none items-center gap-2 pr-3">
 		<span class="text-xs opacity-70">{appVersion.version}</span>
 		{#if $user}
 			<div
@@ -70,57 +70,70 @@
 			<div class="indicator">
 				{#if $notificationCount > 99}
 					<span class="indicator-item badge badge-primary badge-xs">99+</span>
-				{:else if $notificationCount>0}
+				{:else if $notificationCount > 0}
 					<span class="indicator-item badge badge-primary badge-xs">{$notificationCount}</span>
 				{/if}
-			<div class="dropdown dropdown-end">
-				<button class="btn btn-ghost btn-circle avatar avatar-placeholder" aria-label="User menu">
-					<div class="ring-primary ring-offset-base-100 w-10 rounded-full ring ring-offset-1">
-						{#if $user.avatar}
-							<img
-								src={pb.files.getURL($user, $user.avatar, { thumb: '100x100' })}
-								alt="User Avatar"
-							/>
-						{:else}
-							<span class="text-xl">{$user.name.substring(0, 2)}</span>
+				<div class="dropdown dropdown-end">
+					<button class="btn btn-ghost btn-circle avatar avatar-placeholder" aria-label="User menu">
+						<div class="ring-primary ring-offset-base-100 w-10 rounded-full ring ring-offset-1">
+							{#if $user.avatar}
+								<img
+									src={pb.files.getURL($user, $user.avatar, { thumb: '100x100' })}
+									alt="User Avatar"
+								/>
+							{:else}
+								<span class="text-xl">{$user.name.substring(0, 2)}</span>
+							{/if}
+						</div>
+					</button>
+					<ul
+						class="menu menu-compact dropdown-content bg-base-200 rounded-box mt-3 w-52 p-2 shadow"
+						style="z-index: 100;"
+					>
+						<li><a href="/profile">Profile</a></li>
+						<li>
+							<button
+								on:click={() => {
+									openNotification.set(true);
+								}}
+							>
+								Notifications <div class="badge badge-sm">{$notificationCount}</div>
+							</button>
+						</li>
+						{#if $user.role.includes('manager')}
+							<li><a href="/create-auction">Create Auction</a></li>
+							<li><a href="/manage-users">Manage users</a></li>
+							<li><a href="/auction-results">Auction results</a></li>
 						{/if}
-					</div>
-				</button>
-				<ul
-					class="menu menu-compact dropdown-content bg-base-200 rounded-box mt-3 w-52 p-2 shadow"
-					style="z-index: 100;"
-				>
-					<li><a href="/profile">Profile</a></li>
-          <li><button  on:click="{() => {openNotification.set(true)}}">
-            Notifications <div class="badge badge-sm">{$notificationCount}</div>
-          </button></li>
-					{#if $user.role.includes('manager')}
-						<li><a href="/create-auction">Create Auction</a></li>
-						<li><a href="/manage-users">Manage users</a></li>
-						<li><a href="/auction-results">Auction results</a></li>
-					{/if}
-					<li><button type="button" on:click={logout} aria-label="Logout">Logout</button></li>
-				</ul>
+						<li><button type="button" on:click={logout} aria-label="Logout">Logout</button></li>
+					</ul>
+				</div>
 			</div>
-		</div>
 		{:else}
 			<button class="btn btn-primary" on:click={loginWithDiscord}>Login with Discord</button>
 		{/if}
 	</div>
 </nav>
 {#if $openNotification}
-<dialog class="modal modal-open">
-  <div class="modal-box">
-    <h3 class="text-lg font-bold pb-2">Notifications</h3>
-    <NotificationsList bind:notificationCount bind:this={notificationListComponent} />
-	    <div class="modal-action">
-      <form method="dialog">  
-		<button class="btn btn-error" on:click={()=>notificationListComponent.clearAll()}>Clear all</button>
-		<!-- if there is a button in form, it will close the modal -->
-        <button class="btn btn-primary" on:click={()=>{openNotification.set(false)}}>Close</button>
-      </form>
-    </div>
-  </div>
-</dialog>
+	<dialog class="modal modal-open">
+		<div class="modal-box">
+			<h3 class="pb-2 text-lg font-bold">Notifications</h3>
+			<NotificationsList bind:notificationCount bind:this={notificationListComponent} />
+			<div class="modal-action">
+				<form method="dialog">
+					<button class="btn btn-error" on:click={() => notificationListComponent.clearAll()}
+						>Clear all</button
+					>
+					<!-- if there is a button in form, it will close the modal -->
+					<button
+						class="btn btn-primary"
+						on:click={() => {
+							openNotification.set(false);
+						}}>Close</button
+					>
+				</form>
+			</div>
+		</div>
+	</dialog>
 {/if}
 <ToastManager />

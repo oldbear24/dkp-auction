@@ -4,7 +4,7 @@
 	import pb from '$lib/pocketbase';
 	import type { RecordModel } from 'pocketbase';
 	import AuthGuard from '../../components/AuthGuard.svelte';
-	import { user  as curentUser } from '$lib/stores/store';
+	import { user as curentUser } from '$lib/stores/store';
 	let users = writable<RecordModel[]>([]);
 	let searchQuery = writable('');
 	let verifiedFilter = writable('');
@@ -18,24 +18,22 @@
 	async function fetchUsers() {
 		try {
 			let query = '';
-			if($searchQuery!=''){
-				query+=`name ~ '${$searchQuery}'`
+			if ($searchQuery != '') {
+				query += `name ~ '${$searchQuery}'`;
 			}
-			if (query != '' && $verifiedFilter!='') {
+			if (query != '' && $verifiedFilter != '') {
 				query += ' && ';
 			}
-			if($verifiedFilter!='')
-			{
-				query+='validated = '+ $verifiedFilter
+			if ($verifiedFilter != '') {
+				query += 'validated = ' + $verifiedFilter;
 			}
-			console.debug(query)
+			console.debug(query);
 			selectedUsers.set([]);
 			const response = await pb.collection('users').getFullList({
 				filter: query ? `${query}` : '',
 				sort: '+name:lower',
 				fields: userFields,
-				requestKey:"get_users_management"
-				
+				requestKey: 'get_users_management'
 			});
 			users.set(response);
 		} catch (error) {
@@ -60,7 +58,7 @@
 		if (updateQueue.length > 0) {
 			let id = updateQueue.shift();
 			if (id) {
-				console.debug('User update', id, updateQueue.length),
+				(console.debug('User update', id, updateQueue.length),
 					pb
 						.collection('users')
 						.getOne(id, { fields: userFields })
@@ -70,7 +68,7 @@
 									item.id === rec.id ? { ...item, ...rec } : item
 								);
 							});
-						});
+						}));
 			}
 		}
 	}
@@ -122,7 +120,7 @@
 			const changeReason = $tokensChangeReason;
 			await pb.send('/api/change-tokens', {
 				method: 'POST',
-				body: JSON.stringify({ userIds: userIds, amount: newTokens,reason: changeReason })
+				body: JSON.stringify({ userIds: userIds, amount: newTokens, reason: changeReason })
 			});
 
 			closeDialog();
@@ -141,11 +139,13 @@
 			if (target.files && target.files.length > 0) {
 				const file = target.files[0];
 				file.text().then(async (text) => {
-					const userIds = text.split("\n").map(id => id.trim());	
-					console.log(userIds)			
-					selectedUsers.set($users.map(user => user.id));
-					selectedUsers.set($users.filter(user => userIds.includes(user.discordId)).map(user => user.id));
-					console.log($selectedUsers)
+					const userIds = text.split('\n').map((id) => id.trim());
+					console.log(userIds);
+					selectedUsers.set($users.map((user) => user.id));
+					selectedUsers.set(
+						$users.filter((user) => userIds.includes(user.discordId)).map((user) => user.id)
+					);
+					console.log($selectedUsers);
 				});
 			}
 		};
@@ -155,37 +155,41 @@
 	function filterVerified(filter: string) {
 		verifiedFilter.set(filter);
 	}
-	function deleteUser(id: string,name: string){
-		if(!confirm("Do you realy want to delete user "+name))return
-		pb.collection("users").delete(id).then((x=>{
-			users.update(x=>x.filter(u=>u.id!=id))
-		})).catch(x=>console.error("Could not delete user",id,x))
-		}
-		function clearTokens(){
-			let percString = prompt("How many percent do you want to remove.","0")
-			if(percString==null||percString=="0")return
-			let perc = parseInt(percString)
-			pb.send("api/clear-tokens",{method:"POST",body:JSON.stringify({percentage:perc})})		
-		}
+	function deleteUser(id: string, name: string) {
+		if (!confirm('Do you realy want to delete user ' + name)) return;
+		pb.collection('users')
+			.delete(id)
+			.then((x) => {
+				users.update((x) => x.filter((u) => u.id != id));
+			})
+			.catch((x) => console.error('Could not delete user', id, x));
+	}
+	function clearTokens() {
+		let percString = prompt('How many percent do you want to remove.', '0');
+		if (percString == null || percString == '0') return;
+		let perc = parseInt(percString);
+		pb.send('api/clear-tokens', { method: 'POST', body: JSON.stringify({ percentage: perc }) });
+	}
 </script>
 
 <div class="container mx-auto">
 	<h1 class="mb-4 text-2xl font-bold">Manage Users</h1>
 	<div class="stats shadow">
-  <div class="stat">
-   
-    <div class="stat-title">Users</div>
-    <div class="stat-value">{$users.length}</div>
-  </div>
-    <div class="stat">
-    <div class="stat-title">Tokens average</div>
-    <div class="stat-value">{($users.reduce((a,n)=>a+n.tokens,0)/$users.length).toFixed(2)}</div>
-  </div>
-     <div class="stat">
-    <div class="stat-title">Tokens total</div>
-    <div class="stat-value">{$users.reduce((a,n)=>a+n.tokens,0)}</div>
-  </div>
-</div>
+		<div class="stat">
+			<div class="stat-title">Users</div>
+			<div class="stat-value">{$users.length}</div>
+		</div>
+		<div class="stat">
+			<div class="stat-title">Tokens average</div>
+			<div class="stat-value">
+				{($users.reduce((a, n) => a + n.tokens, 0) / $users.length).toFixed(2)}
+			</div>
+		</div>
+		<div class="stat">
+			<div class="stat-title">Tokens total</div>
+			<div class="stat-value">{$users.reduce((a, n) => a + n.tokens, 0)}</div>
+		</div>
+	</div>
 	<input
 		type="text"
 		placeholder="Search by name"
@@ -196,12 +200,8 @@
 		<button class="btn btn-primary" on:click={openDialog} disabled={$selectedUsers.length === 0}>
 			Change Tokens
 		</button>
-		<button class="btn btn-secondary" on:click={openFileDialog}>
-			Import users
-		</button>
-		<button class="btn btn-error" on:click={clearTokens}>
-			Clear tokens
-		</button>
+		<button class="btn btn-secondary" on:click={openFileDialog}> Import users </button>
+		<button class="btn btn-error" on:click={clearTokens}> Clear tokens </button>
 	</div>
 	<div class="filter">
 		<input
@@ -262,23 +262,25 @@
 								/>
 							</label>
 						</th>
-						<td><div class="flex items-center gap-3">
+						<td
+							><div class="flex items-center gap-3">
 								<div class="avatar avatar-placeholder">
-									<div class="w-12 rounded-full ring-primary ring-offset-base-100 ring ring-offset-1">
+									<div
+										class="ring-primary ring-offset-base-100 w-12 rounded-full ring ring-offset-1"
+									>
 										{#if user.avatar}
-										<img
-											src={pb.files.getURL(user, user.avatar, { thumb: '100x100' })}
-											alt="{user.name} profile image"
-										/>
+											<img
+												src={pb.files.getURL(user, user.avatar, { thumb: '100x100' })}
+												alt="{user.name} profile image"
+											/>
 										{:else}
-										<span class="text-xl">{user.name.substring(0,2)}</span>
+											<span class="text-xl">{user.name.substring(0, 2)}</span>
 										{/if}
 									</div>
 								</div>
 								<div>
 									<div class="font-bold">{user.name}</div>
 								</div>
-							
 							</div>
 						</td>
 						<td>{user.tokens}</td>
@@ -291,7 +293,11 @@
 							/>
 						</td>
 						<td>
-							<button class="btn btn-error" disabled={user.id==$curentUser?.id} on:click={()=>deleteUser(user.id,user.name)} >Delete</button>
+							<button
+								class="btn btn-error"
+								disabled={user.id == $curentUser?.id}
+								on:click={() => deleteUser(user.id, user.name)}>Delete</button
+							>
 						</td>
 					</tr>
 				{/each}
@@ -304,7 +310,7 @@
 
 {#if $showDialog}
 	<div class="modal modal-open">
-		<div class=" rounded p-6 shadow-lg modal-box">
+		<div class=" modal-box rounded p-6 shadow-lg">
 			<h2 class="mb-4 text-xl font-bold">Change Tokens</h2>
 			<p>Selected Users: {$selectedUsers.length}</p>
 			<label class="mb-2 block" for="tokensAmmount">Token amount</label>

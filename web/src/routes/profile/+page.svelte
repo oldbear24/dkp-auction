@@ -32,12 +32,15 @@
 	}
 
 	function deleteUser() {
-		if ($user != null && confirm("Do you really want to delete your account")) {
-			pb.collection("users").delete($user.id).then((x => {
-				pb.authStore.clear();
-				user.set(null);
-				goto('/');
-			})).catch(x => console.error("Could not delete account ERROR:", x));
+		if ($user != null && confirm('Do you really want to delete your account')) {
+			pb.collection('users')
+				.delete($user.id)
+				.then((x) => {
+					pb.authStore.clear();
+					user.set(null);
+					goto('/');
+				})
+				.catch((x) => console.error('Could not delete account ERROR:', x));
 		}
 	}
 
@@ -45,7 +48,11 @@
 		console.log('Fetching transactions for page:', page);
 		currentPage = page;
 		pb.collection('transactions')
-			.getList(page, itemsPerPage, { filter: 'user = "' + $user?.id + '"' ,fields: 'amount,note,created',sort: '-created' })
+			.getList(page, itemsPerPage, {
+				filter: 'user = "' + $user?.id + '"',
+				fields: 'amount,note,created',
+				sort: '-created'
+			})
 			.then((resp) => {
 				transactions = resp;
 				console.debug('Transactions:', transactions.items);
@@ -55,7 +62,7 @@
 			});
 	}
 	onMount(() => {
-		getTransactions()
+		getTransactions();
 	});
 	$: if ($user) {
 		getTransactions(); // Call getTransactions when $user is available
@@ -67,14 +74,11 @@
 		<div class="stat">
 			<div class="flex items-center gap-3">
 				<div class="avatar avatar-placeholder">
-					<div class="w-18 rounded-full ring-primary ring-offset-base-100 ring ring-offset-1">
+					<div class="ring-primary ring-offset-base-100 w-18 rounded-full ring ring-offset-1">
 						{#if $user?.avatar}
-						<img
-							src={pb.files.getURL($user, $user?.avatar)}
-							alt="{$user?.name} profile image"
-						/>
+							<img src={pb.files.getURL($user, $user?.avatar)} alt="{$user?.name} profile image" />
 						{:else}
-						<span class="text-xl">{$user?.name.substring(0,2)}</span>
+							<span class="text-xl">{$user?.name.substring(0, 2)}</span>
 						{/if}
 					</div>
 				</div>
@@ -88,8 +92,9 @@
 
 		<div class="stat">
 			<div class="stat-title">Roles</div>
-			<div class="text-info flex flex-wrap">{#each $user?.role as r}
-				<div class="badge badge-outline badge-accent m-1">{getHumanReadableRole(r)}</div>
+			<div class="text-info flex flex-wrap">
+				{#each $user?.role as r}
+					<div class="badge badge-outline badge-accent m-1">{getHumanReadableRole(r)}</div>
 				{/each}
 			</div>
 		</div>
@@ -108,12 +113,12 @@
 
 		<div class="stat">
 			<div class="stat-title">Usable tokens</div>
-			<div class="stat-value text-info">{$user?.tokens-$user?.reservedTokens}</div>
+			<div class="stat-value text-info">{$user?.tokens - $user?.reservedTokens}</div>
 		</div>
 	</div>
 	<div class="divider"></div>
-	<h2 class="text-2xl font-bold pb-2">Transactions</h2>
-	<div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+	<h2 class="pb-2 text-2xl font-bold">Transactions</h2>
+	<div class="rounded-box border-base-content/5 bg-base-100 overflow-x-auto border">
 		<table class="table">
 			<!-- head -->
 			<thead>
@@ -125,25 +130,39 @@
 			</thead>
 			<tbody>
 				{#each transactions.items as transaction}
-				<tr>
-					<td>{transaction.amount}</td>
-					<td>{transaction.note}</td>
-					<td>{new Date(transaction.created).toLocaleString()}</td>
-				</tr>
+					<tr>
+						<td>{transaction.amount}</td>
+						<td>{transaction.note}</td>
+						<td>{new Date(transaction.created).toLocaleString()}</td>
+					</tr>
 				{/each}
 			</tbody>
 		</table>
 	</div>
 	<div class="join justify-center pt-2">
-		<button class="join-item btn" tabindex="-1" on:click={() => getTransactions(currentPage - 1)} disabled={currentPage === 1}>«</button>
-		<button class="join-item btn" tabindex="-1">Page {currentPage} of {transactions.totalPages}</button>
-		<button class="join-item btn" tabindex="-1" on:click={() => getTransactions(currentPage + 1)} disabled={currentPage === transactions.totalPages}>»</button>
+		<button
+			class="join-item btn"
+			tabindex="-1"
+			on:click={() => getTransactions(currentPage - 1)}
+			disabled={currentPage === 1}>«</button
+		>
+		<button class="join-item btn" tabindex="-1"
+			>Page {currentPage} of {transactions.totalPages}</button
+		>
+		<button
+			class="join-item btn"
+			tabindex="-1"
+			on:click={() => getTransactions(currentPage + 1)}
+			disabled={currentPage === transactions.totalPages}>»</button
+		>
 	</div>
 	<div class="divider"></div>
 
 	<div>
 		<input type="checkbox" class="toggle toggle-error" bind:checked={deleteToggle} />
-		<button disabled={!deleteToggle} on:click={deleteUser} class="btn btn-error w-45">Delete my account</button>
+		<button disabled={!deleteToggle} on:click={deleteUser} class="btn btn-error w-45"
+			>Delete my account</button
+		>
 	</div>
 </div>
 <AuthGuard />

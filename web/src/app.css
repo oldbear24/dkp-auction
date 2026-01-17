@@ -2,7 +2,7 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 */
-@import "tailwindcss";
- @plugin "daisyui" {
-   themes: dark --default;
- }
+@import 'tailwindcss';
+@plugin 'daisyui' {
+	themes: dark --default;
+}

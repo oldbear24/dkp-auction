@@ -5,12 +5,12 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"   # or "daily", "monthly"
+      interval: 'weekly' # or "daily", "monthly"
     groups:
       all-deps:
-        applies-to: "version-updates"
+        applies-to: 'version-updates'
         patterns:
-          - "*"            # match every dependency
+          - '*' # match every dependency

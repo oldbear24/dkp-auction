@@ -19,7 +19,12 @@ $: {
     favouriteId = null;
   } else {
     const favs = item.favourites_via_auction || item.expand?.favourites_via_auction || [];
-    const fav = favs.find((f:any) => (f?.user === $user?.id) || (f?.user?.id === $user?.id));
+    // PocketBase may return relation fields either as an ID string or as an expanded record.
+    // Normalize to a single userId value before comparing with the current user.
+    const fav = favs.find((f: any) => {
+      const favUserId = typeof f?.user === 'string' ? f.user : f?.user?.id;
+      return favUserId === $user?.id;
+    });
     isFavourite = !!fav;
     favouriteId = fav?.id ?? null;
   }

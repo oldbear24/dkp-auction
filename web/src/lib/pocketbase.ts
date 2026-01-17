@@ -17,7 +17,7 @@ export async function unsubscribeFromAuctionUpdates() {
 export async function subscribeToUserUpdate(userId: string, callback: (record: RecordModel) => void) {
   await pb.collection('users').subscribe(userId, (e) => {
     console.log('User updated:', e);
-    callback(e.record);    
+    callback(e.record);
   });
 }
 export async function unsubscribeFromUserUpdates() {

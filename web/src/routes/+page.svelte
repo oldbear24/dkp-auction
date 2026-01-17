@@ -80,6 +80,11 @@
 		fetchItems(1).then(subscribeToCurrentPage);
 	}
 
+	function handleFavouriteToggled() {
+		// Refetch items to update the list when a favourite is toggled
+		fetchItems(currentPage).then(subscribeToCurrentPage);
+	}
+
 	fetchItems(currentPage).then(subscribeToCurrentPage);
 </script>
 
@@ -105,7 +110,7 @@
 		</div>
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{#each items.items as item}
-				<AuctionItem {item} />
+				<AuctionItem {item} on:favouriteToggled={handleFavouriteToggled} />
 			{/each}
 		</div>
 	</div>

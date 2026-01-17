@@ -3,10 +3,12 @@
 
   import pb from '$lib/pocketbase';
   import { writable } from 'svelte/store';
-  import { onDestroy, onMount } from 'svelte';
+  import { onDestroy, onMount, createEventDispatcher } from 'svelte';
   import { showToast,user } from '$lib/stores/store';
 	import type { RecordModel } from 'pocketbase';
 	import RarityLabel from './RarityLabel.svelte';
+  
+  const dispatch = createEventDispatcher();
   $: currentBid = item ? Math.max(item.startingBid, item.currentBid) : 0;
 
   export let item: RecordModel;
@@ -48,6 +50,8 @@ async function toggleFavourite(event?: Event) {
       isFavourite = true;
       favouriteId = rec.id;
     }
+    // Dispatch event to parent component so it can refetch items if needed
+    dispatch('favouriteToggled', { itemId: item.id, isFavourite });
   } catch (err:any) {
     showToast(err?.message || 'Action failed', 'error');
   }

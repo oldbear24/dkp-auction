@@ -7,6 +7,7 @@
   let items: ListResult<RecordModel> = { page: 1, perPage: itemsPerPage, totalItems: 0, totalPages: 0, items: [] };
   let currentPage = 1;
   let searchQuery = '';
+  let showFavouritesOnly = false;
   async function fetchItems(page: number) {
     const date = new Date();
         date.setDate(date.getDate() -2 );
@@ -16,7 +17,13 @@
       filterString += ` && itemName ~ '${searchQuery}%'`;
     }
     console.debug('Fetching items with filter:', filterString);
-    const records = await pb.collection('auctions').getList(page, itemsPerPage, { sort: "-endTime", filter: filterString });
+    // Do not sort by favourites; always sort by end time. If "showFavouritesOnly" is enabled,
+    // filter to auctions that have a favourite record for the current user.
+    if (showFavouritesOnly && $user) {
+      // PocketBase supports filtering on expanded relations when using the relation name.
+      filterString += ` && favourites_via_auction.user = '${$user.id}'`;
+    }
+    const records = await pb.collection('auctions').getList(page, itemsPerPage, {expand:"favourites_via_auction", sort: "-endTime", filter: filterString });
     items = records;
   }
 
@@ -46,6 +53,12 @@
     fetchItems(1).then(subscribeToCurrentPage);
   }
 
+  function handleToggleFavourites() {
+    // reset to first page when toggling
+    currentPage = 1;
+    fetchItems(1).then(subscribeToCurrentPage);
+  }
+
   fetchItems(currentPage).then(subscribeToCurrentPage);
 </script>
 {#if $user}
@@ -58,6 +71,10 @@
       bind:value={searchQuery}
       on:input={handleSearch} 
     />
+    <label class="flex items-center space-x-2 ml-4">
+      <input type="checkbox" class="toggle" bind:checked={showFavouritesOnly} on:change={handleToggleFavourites} />
+      <span>Show favourites only</span>
+    </label>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     {#each items.items as item}

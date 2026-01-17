@@ -10,6 +10,43 @@
   $: currentBid = item ? Math.max(item.startingBid, item.currentBid) : 0;
 
   export let item: RecordModel;
+  let isFavourite = false;
+  let favouriteId:string | null = null;
+
+$: {
+  if (!item || !$user) {
+    isFavourite = false;
+    favouriteId = null;
+  } else {
+    const favs = item.favourites_via_auction || item.expand?.favourites_via_auction || [];
+    const fav = favs.find((f:any) => (f?.user === $user?.id) || (f?.user?.id === $user?.id));
+    isFavourite = !!fav;
+    favouriteId = fav?.id ?? null;
+  }
+}
+
+async function toggleFavourite(event?: Event) {
+  event?.stopPropagation?.();
+  if (!$user) {
+    showToast('Please log in to manage favourites', 'error');
+    return;
+  }
+  try {
+    if (isFavourite && favouriteId) {
+      await pb.collection('favourites').delete(favouriteId);
+      showToast('Removed from favourites', 'success');
+      isFavourite = false;
+      favouriteId = null;
+    } else {
+      const rec = await pb.collection('favourites').create({ auction: item.id, user: $user.id });
+      showToast('Added to favourites', 'success');
+      isFavourite = true;
+      favouriteId = rec.id;
+    }
+  } catch (err:any) {
+    showToast(err?.message || 'Action failed', 'error');
+  }
+}
   let showModal = writable(false);
   let bidAmount = writable(item.bid);
   let countdown = writable({ years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -90,7 +127,16 @@
     <img src={getImage(item)} alt={item.itemName} class="w-full h-48 object-cover rounded-lg" />
   </figure>
   <div class="card-body">
-    <h2 class="card-title font-bold underline text-xl decoration-gray-300">{item.itemName}</h2>
+    <div class="flex justify-between items-start w-full">
+      <h2 class="card-title font-bold underline text-xl decoration-gray-300">{item.itemName}</h2>
+      <button class="btn btn-ghost btn-circle" on:click|stopPropagation={toggleFavourite} aria-label="Toggle favourite">
+        {#if isFavourite}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41.81 4.5 2.09C12.09 4.81 13.76 4 15.5 4 18 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        {:else}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 10-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+        {/if}
+      </button>
+    </div>
     <p><RarityLabel value={item.rarity} asBadge /></p>
     <p class="whitespace-pre-wrap overflow-auto max-h-20">{item.description}</p>
     <p class="font-bold text-lg">Current Bid: {currentBid}</p>

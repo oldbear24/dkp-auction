@@ -11,7 +11,7 @@
 
   export let item: RecordModel;
   let isFavourite = false;
-  let favouriteId:string | null = null;
+  let favouriteId: string | null = null;
 
 $: {
   if (!item || !$user) {

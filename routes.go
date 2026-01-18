@@ -20,8 +20,50 @@ func RegisterRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/seen-notifications/{id}", seenNotification).Bind(apis.RequireAuth())
 	se.Router.POST("/api/seen-notifications", seenNotifications).Bind(apis.RequireAuth())
 	se.Router.POST("/api/clear-tokens", clearTokens).Bind(apis.RequireAuth())
+	se.Router.POST("/api/add-to-favourites/{id}", addToFavourites).Bind(apis.RequireAuth())
+	se.Router.POST("/api/remove-from-favourites/{id}", removeFromFavourites).Bind(apis.RequireAuth())
 
 }
+
+// addToFavourites adds an auction to the user's favourites.
+func addToFavourites(e *core.RequestEvent) error {
+	auctionId := e.Request.PathValue("id")
+	if auctionId == "" {
+		return e.BadRequestError("Auction ID is required", nil)
+	}
+	auctionRecord, err := e.App.FindRecordById("auctions", auctionId)
+	if err != nil {
+		return e.BadRequestError("Could not retrieve auction", err)
+	}
+	auctionRecord.Set("favourites+", e.Auth.Id)
+	if err := e.App.Save(auctionRecord); err != nil {
+		return e.BadRequestError("Could not save auction", err)
+	}
+	return e.JSON(200, map[string]interface{}{
+		"success": true,
+	})
+}
+
+// removeFromFavourites removes an auction from the user's favourites.
+func removeFromFavourites(e *core.RequestEvent) error {
+	auctionId := e.Request.PathValue("id")
+	if auctionId == "" {
+		return e.BadRequestError("Auction ID is required", nil)
+	}
+	auctionRecord, err := e.App.FindRecordById("auctions", auctionId)
+	if err != nil {
+		return e.BadRequestError("Could not retrieve auction", err)
+	}
+	auctionRecord.Set("favourites-", e.Auth.Id)
+	if err := e.App.Save(auctionRecord); err != nil {
+		return e.BadRequestError("Could not save auction", err)
+	}
+	return e.JSON(200, map[string]interface{}{
+		"success": true,
+	})
+
+}
+
 // resolveAuction marks an auction result as resolved.
 func resolveAuction(e *core.RequestEvent) error {
 	if !checkIfUserIsInRole(e.Auth, "manager") {
@@ -47,6 +89,7 @@ func resolveAuction(e *core.RequestEvent) error {
 		"success": true,
 	})
 }
+
 // setVerified updates the validated flag for a user.
 func setVerified(e *core.RequestEvent) error {
 	var data struct {
@@ -294,6 +337,7 @@ func seenNotifications(e *core.RequestEvent) error {
 	})
 
 }
+
 // seenNotification marks a single notification as seen.
 func seenNotification(e *core.RequestEvent) error {
 	notificationId := e.Request.PathValue("id")
@@ -312,6 +356,7 @@ func seenNotification(e *core.RequestEvent) error {
 		"success": true,
 	})
 }
+
 // clearTokens removes a percentage of tokens from all users.
 func clearTokens(e *core.RequestEvent) error {
 	var data struct {

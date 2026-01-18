@@ -31,7 +31,7 @@
 		// filter to auctions that have a favourite record for the current user.
 		if (showFavouritesOnly && $user) {
 			// PocketBase supports filtering on expanded relations when using the relation name.
-			filterParts.push(`favourites_via_auction.user = {:userId}`);
+			filterParts.push(`favourites.id ?= {:userId}`);
 			filterParams.userId = $user.id;
 		}
 
@@ -41,8 +41,7 @@
 		const records = await pb
 			.collection('auctions')
 			.getList(page, itemsPerPage, {
-				expand: 'favourites_via_auction',
-				sort: '-endTime',
+				sort: '-endTime,id',
 				filter: filterString
 			});
 		items = records;

@@ -13,8 +13,14 @@
 	$: id = page.url.searchParams.get('id') ?? '';
 
 	// Reactive statement to handle id changes
-	$: if (mounted && id) {
-		loadAuction(id);
+	$: if (mounted) {
+		if (id) {
+			loadAuction(id);
+		} else {
+			// Clear data when id is empty
+			item = null;
+			loading = false;
+		}
 	}
 
 	async function loadAuction(auctionId: string) {
@@ -22,8 +28,11 @@
 		console.debug('Loading auction with id:', auctionId);
 
 		// Unsubscribe from previous auction if exists
-		if (currentSubscriptionId && currentSubscriptionId !== auctionId) {
-			pb.collection('auctions').unsubscribe(currentSubscriptionId);
+		const previousSubscriptionId = currentSubscriptionId;
+		currentSubscriptionId = auctionId;
+
+		if (previousSubscriptionId && previousSubscriptionId !== auctionId) {
+			pb.collection('auctions').unsubscribe(previousSubscriptionId);
 		}
 
 		try {
@@ -32,7 +41,6 @@
 				console.debug('Received auction update:', updatedRecord);
 				item = updatedRecord;
 			});
-			currentSubscriptionId = auctionId;
 		} catch (err) {
 			console.error('Failed to load auction', err);
 			item = null;

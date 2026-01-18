@@ -31,17 +31,17 @@ onDestroy(() => {
     }
   });
 </script>
-{#if loading}
-  <div class="flex items-center justify-center h-64">Loading auction...</div>
-{:else}
-  {#if item}
-    <div class="container mx-auto px-4 py-6">
-      <div class="mb-4">
-        <a href="/" class="link">← Back to auctions</a>
-      </div>
-      <AuctionItem {item} />
-    </div>
+  {#if loading}
+    <div class="flex items-center justify-center h-64">Loading auction...</div>
   {:else}
-    <div class="flex items-center justify-center h-64">Auction not found</div>
+    {#if item}
+      <div class="container mx-auto px-4 py-6">
+        <div class="mb-4">
+          <a href="/" class="link">← Back to auctions</a>
+        </div>
+        <AuctionItem {item} />
+      </div>
+    {:else}
+      <div class="flex items-center justify-center h-64">Auction not found</div>
+    {/if}
   {/if}
-{/if}

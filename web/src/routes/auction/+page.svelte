@@ -13,7 +13,7 @@
     console.debug('Loading auction with id:', id);
     try {
       item = await pb.collection('auctions').getOne(id);
-      subscribeToAuctionUpdate(id, (updatedRecord) => {
+      await subscribeToAuctionUpdate(id, (updatedRecord) => {
         console.debug('Received auction update:', updatedRecord);
         item = updatedRecord;
       });

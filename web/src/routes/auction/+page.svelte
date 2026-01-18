@@ -3,8 +3,9 @@
   import { page } from '$app/state';
   import pb, { subscribeToAuctionUpdate } from '$lib/pocketbase';
   import AuctionItem from '../../components/AuctionItem.svelte';
+  import type { RecordModel } from 'pocketbase';
 
-  let item: any = null;
+  let item: RecordModel | null = null;
   let loading = true;
 
   $: id = page.url.searchParams.get('id') ?? '';

@@ -26,7 +26,7 @@
     }
   });
 
-onDestroy(() => {
+  onDestroy(() => {
     if (id) {
       pb.collection('auctions').unsubscribe(id);
     }

@@ -2,7 +2,7 @@
 
 	import { toasts } from "$lib/stores/store";
 </script>
-<div class="toast toast-bottom toast-center">
+<div class="toast toast-bottom toast-center z-1000">
     {#each $toasts as toast (toast.id)}
     {#if toast.type === 'error'}
     <div role="alert" class="alert alert-error">

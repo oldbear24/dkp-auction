@@ -90,7 +90,7 @@
 					<div class="stat-title">Validated Users</div>
 					<div class="stat-value">{stats.validatedUsers}</div>
 					<div class="stat-desc">
-						{((stats.validatedUsers / stats.totalUsers) * 100).toFixed(1)}% validated
+						{stats.totalUsers > 0 ? ((stats.validatedUsers / stats.totalUsers) * 100).toFixed(1) : 0}% validated
 					</div>
 				</div>
 			</div>
@@ -113,7 +113,7 @@
 					<div class="stat-title">Available Tokens</div>
 					<div class="stat-value text-success">{stats.availableTokens.toLocaleString()}</div>
 					<div class="stat-desc">
-						{((stats.availableTokens / stats.totalTokens) * 100).toFixed(1)}% available
+						{stats.totalTokens > 0 ? ((stats.availableTokens / stats.totalTokens) * 100).toFixed(1) : 0}% available
 					</div>
 				</div>
 			</div>

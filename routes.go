@@ -423,26 +423,24 @@ func getDashboardStats(e *core.RequestEvent) error {
 	}
 	stats["totalUsers"] = totalUsers
 
-	validatedUsers, err := e.App.FindRecordsByFilter("users", "validated = true", "", 0, 0)
+	validatedUsersCount, err := e.App.CountRecords("users", dbx.HashExp{"validated": true})
 	if err != nil {
 		return e.BadRequestError("Error counting validated users", err)
 	}
-	stats["validatedUsers"] = len(validatedUsers)
+	stats["validatedUsers"] = validatedUsersCount
 
-	// Token statistics
-	allUsers, err := e.App.FindAllRecords("users")
+	// Token statistics using database aggregation
+	var tokenStats struct {
+		TotalTokens    int `db:"totalTokens"`
+		ReservedTokens int `db:"reservedTokens"`
+	}
+	err = e.App.DB().Select("SUM(tokens) as totalTokens, SUM(reservedTokens) as reservedTokens").From("users").One(&tokenStats)
 	if err != nil {
-		return e.BadRequestError("Error fetching users", err)
+		return e.BadRequestError("Error fetching token statistics", err)
 	}
-	totalTokens := 0
-	totalReservedTokens := 0
-	for _, user := range allUsers {
-		totalTokens += user.GetInt("tokens")
-		totalReservedTokens += user.GetInt("reservedTokens")
-	}
-	stats["totalTokens"] = totalTokens
-	stats["totalReservedTokens"] = totalReservedTokens
-	stats["availableTokens"] = totalTokens - totalReservedTokens
+	stats["totalTokens"] = tokenStats.TotalTokens
+	stats["totalReservedTokens"] = tokenStats.ReservedTokens
+	stats["availableTokens"] = tokenStats.TotalTokens - tokenStats.ReservedTokens
 
 	// Auction statistics
 	ongoingAuctions, err := e.App.CountRecords("auctions", dbx.HashExp{"state": "ongoing"})

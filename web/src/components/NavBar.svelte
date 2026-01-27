@@ -94,8 +94,11 @@
           <li><button  on:click="{() => {openNotification.set(true)}}">
             Notifications <div class="badge badge-sm">{$notificationCount}</div>
           </button></li>
+		  			{#if $user.role.includes('admin')}
+		  				<li><a href="/admin">Dashboard</a></li>
+					{/if}
+
 					{#if $user.role.includes('manager')}
-						<li><a href="/admin">Dashboard</a></li>
 						<li><a href="/create-auction">Create Auction</a></li>
 						<li><a href="/manage-users">Manage users</a></li>
 						<li><a href="/auction-results">Auction results</a></li>

@@ -410,7 +410,7 @@ func clearTokens(e *core.RequestEvent) error {
 
 // getDashboardStats returns comprehensive statistics for the admin dashboard.
 func getDashboardStats(e *core.RequestEvent) error {
-	if !checkIfUserIsInRole(e.Auth, "manager") {
+	if !checkIfUserIsInRole(e.Auth, "admin") {
 		return e.UnauthorizedError("Unauthorized", nil)
 	}
 

@@ -203,4 +203,4 @@
 	{/if}
 </div>
 
-<AuthGuard requiredRole="manager" />
+<AuthGuard requiredRole="admin" />

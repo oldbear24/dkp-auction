@@ -22,6 +22,7 @@ func RegisterRoutes(se *core.ServeEvent) {
 	se.Router.POST("/api/clear-tokens", clearTokens).Bind(apis.RequireAuth())
 	se.Router.POST("/api/add-to-favourites/{id}", addToFavourites).Bind(apis.RequireAuth())
 	se.Router.POST("/api/remove-from-favourites/{id}", removeFromFavourites).Bind(apis.RequireAuth())
+	se.Router.GET("/api/dashboard-stats", getDashboardStats).Bind(apis.RequireAuth())
 
 }
 
@@ -405,4 +406,118 @@ func clearTokens(e *core.RequestEvent) error {
 			"changes": changeData,
 		})
 	})
+}
+
+// getDashboardStats returns comprehensive statistics for the admin dashboard.
+func getDashboardStats(e *core.RequestEvent) error {
+	if !checkIfUserIsInRole(e.Auth, "admin") {
+		return e.UnauthorizedError("Unauthorized", nil)
+	}
+
+	stats := make(map[string]interface{})
+
+	// User statistics
+	totalUsers, err := e.App.CountRecords("users")
+	if err != nil {
+		return e.BadRequestError("Error counting users", err)
+	}
+	stats["totalUsers"] = totalUsers
+
+	validatedUsersCount, err := e.App.CountRecords("users", dbx.HashExp{"validated": true})
+	if err != nil {
+		return e.BadRequestError("Error counting validated users", err)
+	}
+	stats["validatedUsers"] = validatedUsersCount
+
+	// Token statistics using database aggregation
+	var tokenStats struct {
+		TotalTokens    int `db:"totalTokens"`
+		ReservedTokens int `db:"reservedTokens"`
+	}
+	err = e.App.DB().Select("SUM(tokens) as totalTokens, SUM(reservedTokens) as reservedTokens").From("users").One(&tokenStats)
+	if err != nil {
+		return e.BadRequestError("Error fetching token statistics", err)
+	}
+	stats["totalTokens"] = tokenStats.TotalTokens
+	stats["totalReservedTokens"] = tokenStats.ReservedTokens
+	stats["availableTokens"] = tokenStats.TotalTokens - tokenStats.ReservedTokens
+
+	// Auction statistics
+	ongoingAuctions, err := e.App.CountRecords("auctions", dbx.HashExp{"state": "ongoing"})
+	if err != nil {
+		return e.BadRequestError("Error counting ongoing auctions", err)
+	}
+	stats["ongoingAuctions"] = ongoingAuctions
+
+	finishedAuctions, err := e.App.CountRecords("auctions", dbx.HashExp{"state": "finished"})
+	if err != nil {
+		return e.BadRequestError("Error counting finished auctions", err)
+	}
+	stats["finishedAuctions"] = finishedAuctions
+
+	totalAuctions, err := e.App.CountRecords("auctions")
+	if err != nil {
+		return e.BadRequestError("Error counting total auctions", err)
+	}
+	stats["totalAuctions"] = totalAuctions
+
+	// Recent auctions (last 24 hours)
+	yesterday := time.Now().Add(-24 * time.Hour)
+	recentAuctions, err := e.App.FindRecordsByFilter(
+		"auctions",
+		"created >= {:yesterday}",
+		"-created",
+		10,
+		0,
+		dbx.Params{"yesterday": yesterday.Format(time.RFC3339)},
+	)
+	if err != nil {
+		return e.BadRequestError("Error fetching recent auctions", err)
+	}
+	stats["recentAuctionsCount"] = len(recentAuctions)
+
+	// Bid statistics
+	totalBids, err := e.App.CountRecords("bids")
+	if err != nil {
+		return e.BadRequestError("Error counting bids", err)
+	}
+	stats["totalBids"] = totalBids
+
+	// Unresolved auction results
+	unresolvedResults, err := e.App.CountRecords("auctionsResult", dbx.HashExp{"resolved": false})
+	if err != nil {
+		return e.BadRequestError("Error counting unresolved results", err)
+	}
+	stats["unresolvedResults"] = unresolvedResults
+
+	// Latest token health check
+	latestHealthCheck, err := e.App.FindRecordsByFilter(
+		"tokenHealthChecks",
+		"",
+		"-created",
+		1,
+		0,
+	)
+	if err == nil && len(latestHealthCheck) > 0 {
+		stats["latestHealthCheckState"] = latestHealthCheck[0].GetString("state")
+		stats["latestHealthCheckDate"] = latestHealthCheck[0].GetDateTime("created")
+	} else {
+		stats["latestHealthCheckState"] = "unknown"
+		stats["latestHealthCheckDate"] = nil
+	}
+
+	// Total notifications
+	totalNotifications, err := e.App.CountRecords("notifications")
+	if err != nil {
+		return e.BadRequestError("Error counting notifications", err)
+	}
+	stats["totalNotifications"] = totalNotifications
+
+	unseenNotifications, err := e.App.CountRecords("notifications", dbx.HashExp{"seen": false})
+	if err != nil {
+		return e.BadRequestError("Error counting unseen notifications", err)
+	}
+	stats["unseenNotifications"] = unseenNotifications
+
+	return e.JSON(200, stats)
 }

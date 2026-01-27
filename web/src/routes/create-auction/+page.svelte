@@ -82,6 +82,7 @@
 	<input required id="endTime" class="input validator" bind:value={$endTime} type="datetime-local" defaultValue={getNextDate} />
 	<div>
 		<button class="btn btn-accent" on:click={()=>getNextDate(1)} type="button" >+1D</button>
+		<button class="btn btn-accent" on:click={()=>getNextDate(2)} type="button" >+2D</button>
 		<button class="btn btn-accent" on:click={()=>getNextDate(7)} type="button" >+7D</button>	
 	</div>
 		<button class="btn btn-primary" type="submit" >Create Auction</button>

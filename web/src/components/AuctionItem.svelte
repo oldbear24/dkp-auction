@@ -152,67 +152,41 @@
     
 		<!-- Current Bid Display -->
 		<div class="bg-base-300 rounded-box p-4 mb-4 border border-primary/20">
-			<div class="flex items-center justify-between">
-				<span class="text-sm opacity-70">Current Bid</span>
-				<div class="flex items-center gap-2">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
-					<span class="text-2xl font-bold text-primary">{currentBid}</span>
+			<div class="flex flex-col gap-3">
+				<div class="flex items-center justify-between">
+					<span class="text-sm opacity-70">Current Bid</span>
+					<div class="flex items-center gap-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						<span class="text-2xl font-bold text-primary">{currentBid}</span>
+					</div>
+				</div>
+				<!-- Countdown Timer - Inline -->
+				<div class="flex items-center justify-between border-t border-base-content/10 pt-3">
+					<span class="text-sm opacity-70">Time Remaining</span>
+					<div class="flex items-center gap-1 font-mono text-sm font-semibold">
+						{#if $countdown.years > 0}
+							<span class="bg-base-100 px-2 py-1 rounded">{$countdown.years}y</span>
+						{/if}
+						{#if $countdown.months > 0}
+							<span class="bg-base-100 px-2 py-1 rounded">{$countdown.months}mo</span>
+						{/if}
+						{#if $countdown.days > 0}
+							<span class="bg-base-100 px-2 py-1 rounded">{$countdown.days}d</span>
+						{/if}
+						{#if $countdown.hours > 0}
+							<span class="bg-base-100 px-2 py-1 rounded">{$countdown.hours}h</span>
+						{/if}
+						{#if $countdown.minutes > 0}
+							<span class="bg-base-100 px-2 py-1 rounded">{$countdown.minutes}m</span>
+						{/if}
+						{#if $countdown.seconds > 0 || ($countdown.years === 0 && $countdown.months === 0 && $countdown.days === 0 && $countdown.hours === 0 && $countdown.minutes === 0)}
+							<span class="bg-base-100 px-2 py-1 rounded">{$countdown.seconds}s</span>
+						{/if}
+					</div>
 				</div>
 			</div>
-		</div>
-
-		<!-- Countdown Timer -->
-		<div class="flex justify-center gap-2 mb-4 flex-wrap">
-			{#if $countdown.years > 0}
-				<div class="bg-base-300 rounded-box p-3 text-center min-w-[4rem]">
-					<div class="countdown font-mono text-2xl">
-						<span style="--value:{$countdown.years};"></span>
-					</div>
-					<div class="text-xs opacity-70">years</div>
-				</div>
-			{/if}
-			{#if $countdown.months > 0}
-				<div class="bg-base-300 rounded-box p-3 text-center min-w-[4rem]">
-					<div class="countdown font-mono text-2xl">
-						<span style="--value:{$countdown.months};"></span>
-					</div>
-					<div class="text-xs opacity-70">months</div>
-				</div>
-			{/if}
-			{#if $countdown.days > 0}
-				<div class="bg-base-300 rounded-box p-3 text-center min-w-[4rem]">
-					<div class="countdown font-mono text-2xl">
-						<span style="--value:{$countdown.days};"></span>
-					</div>
-					<div class="text-xs opacity-70">days</div>
-				</div>
-			{/if}
-			{#if $countdown.hours > 0}
-				<div class="bg-base-300 rounded-box p-3 text-center min-w-[4rem]">
-					<div class="countdown font-mono text-2xl">
-						<span style="--value:{$countdown.hours};"></span>
-					</div>
-					<div class="text-xs opacity-70">hours</div>
-				</div>
-			{/if}
-			{#if $countdown.minutes > 0}
-				<div class="bg-base-300 rounded-box p-3 text-center min-w-[4rem]">
-					<div class="countdown font-mono text-2xl">
-						<span style="--value:{$countdown.minutes};"></span>
-					</div>
-					<div class="text-xs opacity-70">mins</div>
-				</div>
-			{/if}
-			{#if $countdown.seconds > 0}
-				<div class="bg-base-300 rounded-box p-3 text-center min-w-[4rem]">
-					<div class="countdown font-mono text-2xl">
-						<span style="--value:{$countdown.seconds};"></span>
-					</div>
-					<div class="text-xs opacity-70">secs</div>
-				</div>
-			{/if}
 		</div>
     
     {#if item.state === 'ongoing'}

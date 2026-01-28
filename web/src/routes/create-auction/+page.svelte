@@ -89,7 +89,7 @@
 					required 
 					id="itemName" 
 					type="text" 
-					class="input input-bordered input-lg w-full shadow-sm" 
+					class="input input-bordered input-md w-full shadow-sm" 
 					bind:value={$itemName} 
 					list="my-options"
 					placeholder="Enter item name..."
@@ -106,7 +106,7 @@
 						Rarity
 					</span>
 				</label>
-				<select id="rarity" class="select select-bordered select-lg w-full shadow-sm" bind:value={$rarity}>
+				<select id="rarity" class="select select-bordered select-md w-full shadow-sm" bind:value={$rarity}>
 					{#each RARITY_OPTIONS as opt}
 						<option value={opt} class={RARITY_MAP[opt].class}>{RARITY_MAP[opt].label}</option>
 					{/each}
@@ -125,7 +125,7 @@
 				</label>
 				<textarea 
 					id="description" 
-					class="textarea textarea-bordered textarea-lg w-full h-32 shadow-sm" 
+					class="textarea textarea-bordered textarea-md w-full h-32 shadow-sm" 
 					bind:value={$description}
 					placeholder="Describe the item..."
 				></textarea>
@@ -144,7 +144,7 @@
 				<input 
 					id="startingBid" 
 					type="number" 
-					class="input input-bordered input-lg w-full shadow-sm" 
+					class="input input-bordered input-md w-full shadow-sm" 
 					bind:value={$startingBid}
 					placeholder="Enter starting bid amount..."
 				/>
@@ -162,7 +162,7 @@
 				</label>
 				<input 
 					id="mainImage" 
-					class="file-input file-input-bordered file-input-lg w-full shadow-sm" 
+					class="file-input file-input-bordered file-input-md w-full shadow-sm" 
 					type="file" 
 					on:change={handleFileChange}
 					accept="image/*"
@@ -182,7 +182,7 @@
 				<input 
 					required 
 					id="endTime" 
-					class="input input-bordered input-lg w-full shadow-sm" 
+					class="input input-bordered input-md w-full shadow-sm" 
 					bind:value={$endTime} 
 					type="datetime-local"
 				/>
@@ -211,7 +211,7 @@
 
 			<!-- Submit Button -->
 			<div class="form-control pt-4">
-				<button class="btn btn-primary btn-lg w-full gap-2 shadow-lg" type="submit">
+				<button class="btn btn-primary btn-md w-full gap-2 shadow-lg" type="submit">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 					</svg>

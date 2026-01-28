@@ -304,25 +304,25 @@
 				Quick Actions
 			</h2>
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-				<a href="/create-auction" class="btn btn-primary btn-lg gap-2 shadow-lg">
+				<a href="/create-auction" class="btn btn-primary gap-2 shadow-lg">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 					</svg>
 					Create Auction
 				</a>
-				<a href="/manage-users" class="btn btn-secondary btn-lg gap-2 shadow-lg">
+				<a href="/manage-users" class="btn btn-secondary gap-2 shadow-lg">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
 					</svg>
 					Manage Users
 				</a>
-				<a href="/auction-results" class="btn btn-accent btn-lg gap-2 shadow-lg">
+				<a href="/auction-results" class="btn btn-accent gap-2 shadow-lg">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 					</svg>
 					Auction Results
 				</a>
-				<button class="btn btn-info btn-lg gap-2 shadow-lg" on:click={fetchDashboardStats}>
+				<button class="btn btn-info gap-2 shadow-lg" on:click={fetchDashboardStats}>
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
 					</svg>

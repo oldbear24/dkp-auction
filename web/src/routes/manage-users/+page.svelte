@@ -169,161 +169,254 @@
 		}
 </script>
 
-<div class="container mx-auto">
-	<h1 class="mb-4 text-2xl font-bold">Manage Users</h1>
-	<div class="stats shadow">
-  <div class="stat">
-   
-    <div class="stat-title">Users</div>
-    <div class="stat-value">{$users.length}</div>
-  </div>
-    <div class="stat">
-    <div class="stat-title">Tokens average</div>
-    <div class="stat-value">{($users.reduce((a,n)=>a+n.tokens,0)/$users.length).toFixed(2)}</div>
-  </div>
-     <div class="stat">
-    <div class="stat-title">Tokens total</div>
-    <div class="stat-value">{$users.reduce((a,n)=>a+n.tokens,0)}</div>
-  </div>
-</div>
-	<input
-		type="text"
-		placeholder="Search by name"
-		class="input input-bordered mb-4 w-full"
-		bind:value={$searchQuery}
-	/>
-	<div class="mb-4 flex space-x-2">
-		<button class="btn btn-primary" on:click={openDialog} disabled={$selectedUsers.length === 0}>
-			Change Tokens
-		</button>
-		<button class="btn btn-secondary" on:click={openFileDialog}>
-			Import users
-		</button>
-		<button class="btn btn-error" on:click={clearTokens}>
-			Clear tokens
-		</button>
-	</div>
-	<div class="filter">
-		<input
-			class="btn filter-reset"
-			on:click={() => filterVerified('')}
-			type="radio"
-			name="metaframeworks"
-			aria-label="All"
-		/>
-		<input
-			class="btn"
-			type="radio"
-			on:click={() => filterVerified('true')}
-			name="metaframeworks"
-			aria-label="Validated"
-		/>
-		<input
-			class="btn"
-			type="radio"
-			on:click={() => filterVerified('false')}
-			name="metaframeworks"
-			aria-label="Unvalidated"
-		/>
+<div class="space-y-6">
+	<!-- Page Header -->
+	<div class="bg-base-200 rounded-box p-6 shadow-lg border border-base-content/10">
+		<h1 class="text-2xl font-bold mb-3 flex items-center gap-2">
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+			</svg>
+			Manage Users
+		</h1>
+		
+		<!-- Stats -->
+		<div class="stats stats-vertical lg:stats-horizontal shadow-xl mt-4 border border-base-content/10 w-full">
+			<div class="stat bg-primary/10">
+				<div class="stat-figure text-primary">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+					</svg>
+				</div>
+				<div class="stat-title">Total Users</div>
+				<div class="stat-value text-primary">{$users.length}</div>
+			</div>
+			<div class="stat bg-accent/10">
+				<div class="stat-figure text-accent">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+					</svg>
+				</div>
+				<div class="stat-title">Average Tokens</div>
+				<div class="stat-value text-accent">{($users.reduce((a,n)=>a+n.tokens,0)/$users.length).toFixed(2)}</div>
+			</div>
+			<div class="stat bg-success/10">
+				<div class="stat-figure text-success">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+				</div>
+				<div class="stat-title">Total Tokens</div>
+				<div class="stat-value text-success">{$users.reduce((a,n)=>a+n.tokens,0)}</div>
+			</div>
+		</div>
 	</div>
 
-	<div class="h-250 overflow-x-auto">
-		<table class="table-pin-cols table-pin-rows table">
-			<!-- head -->
-			<thead>
-				<tr>
-					<th>
-						<label>
-							<input
-								type="checkbox"
-								class="checkbox"
-								bind:checked={allSelected}
-								on:click={toggleAllCheckboxes}
-							/>
-						</label>
-					</th>
-					<th>Name</th>
-					<th>Tokens</th>
-					<th>Validated</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each $users as user}
+	<!-- Search and Actions -->
+	<div class="bg-base-200 rounded-box p-6 shadow-lg border border-base-content/10 space-y-4">
+		<div class="form-control">
+			<div class="input-group">
+				<input
+					type="text"
+					placeholder="Search by name..."
+					class="input input-bordered w-full shadow-sm"
+					bind:value={$searchQuery}
+				/>
+				<button class="btn btn-square btn-primary" aria-label="Search">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<div class="flex flex-wrap gap-3">
+			<button class="btn btn-primary gap-2" on:click={openDialog} disabled={$selectedUsers.length === 0}>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				Change Tokens ({$selectedUsers.length})
+			</button>
+			<button class="btn btn-secondary gap-2" on:click={openFileDialog}>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+				</svg>
+				Import Users
+			</button>
+			<button class="btn btn-error gap-2" on:click={clearTokens}>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+				</svg>
+				Clear Tokens
+			</button>
+		</div>
+
+		<!-- Filter Tabs -->
+		<div class="tabs tabs-boxed bg-base-100 shadow-inner">
+			<button 
+				class="tab gap-2 {$verifiedFilter === '' ? 'tab-active' : ''}" 
+				on:click={() => filterVerified('')}
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+				</svg>
+				All Users
+			</button>
+			<button 
+				class="tab gap-2 {$verifiedFilter === 'true' ? 'tab-active' : ''}" 
+				on:click={() => filterVerified('true')}
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				Validated
+			</button>
+			<button 
+				class="tab gap-2 {$verifiedFilter === 'false' ? 'tab-active' : ''}" 
+				on:click={() => filterVerified('false')}
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				Unvalidated
+			</button>
+		</div>
+	</div>
+	<!-- Users Table -->
+	<div class="bg-base-200 rounded-box p-6 shadow-lg border border-base-content/10">
+		<div class="overflow-x-auto rounded-box border border-base-content/10 bg-base-100 shadow-inner">
+			<table class="table table-zebra">
+				<thead class="bg-base-300">
 					<tr>
-						<th>
+						<th class="text-base">
 							<label>
 								<input
 									type="checkbox"
-									bind:group={$selectedUsers}
-									name={user.id}
-									value={user.id}
-									class="checkbox user-checkbox"
+									class="checkbox checkbox-primary"
+									bind:checked={allSelected}
+									on:click={toggleAllCheckboxes}
 								/>
 							</label>
 						</th>
-						<td><div class="flex items-center gap-3">
-								<div class="avatar avatar-placeholder">
-									<div class="w-12 rounded-full ring-primary ring-offset-base-100 ring ring-offset-1">
-										{#if user.avatar}
-										<img
-											src={pb.files.getURL(user, user.avatar, { thumb: '100x100' })}
-											alt="{user.name} profile image"
-										/>
-										{:else}
-										<span class="text-xl">{user.name.substring(0,2)}</span>
-										{/if}
+						<th class="text-base">User</th>
+						<th class="text-base">Tokens</th>
+						<th class="text-base">Status</th>
+						<th class="text-base">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each $users as user}
+						<tr class="hover">
+							<th>
+								<label>
+									<input
+										type="checkbox"
+										bind:group={$selectedUsers}
+										name={user.id}
+										value={user.id}
+										class="checkbox checkbox-primary user-checkbox"
+									/>
+								</label>
+							</th>
+							<td>
+								<div class="flex items-center gap-3">
+									<div class="avatar avatar-placeholder">
+										<div class="w-12 rounded-full ring-primary ring-offset-base-100 ring-2 ring-offset-2">
+											{#if user.avatar}
+											<img
+												src={pb.files.getURL(user, user.avatar, { thumb: '100x100' })}
+												alt="{user.name} profile image"
+											/>
+											{:else}
+											<span class="text-xl font-bold">{user.name.substring(0,2)}</span>
+											{/if}
+										</div>
+									</div>
+									<div>
+										<div class="font-bold">{user.name}</div>
 									</div>
 								</div>
-								<div>
-									<div class="font-bold">{user.name}</div>
-								</div>
-							
-							</div>
-						</td>
-						<td>{user.tokens}</td>
-						<td>
-							<input
-								type="checkbox"
-								on:click={() => changeValidation(user.id, user.validated)}
-								bind:checked={user.validated}
-								class="toggle text-error checked:text-success"
-							/>
-						</td>
-						<td>
-							<button class="btn btn-error" disabled={user.id==$curentUser?.id} on:click={()=>deleteUser(user.id,user.name)} >Delete</button>
-						</td>
-					</tr>
-				{/each}
-			</tbody>
-			<!-- foot -->
-			<tfoot> </tfoot>
-		</table>
+							</td>
+							<td>
+								<div class="badge badge-primary badge-lg font-semibold">{user.tokens}</div>
+							</td>
+							<td>
+								<input
+									type="checkbox"
+									on:click={() => changeValidation(user.id, user.validated)}
+									bind:checked={user.validated}
+									class="toggle toggle-success"
+								/>
+							</td>
+							<td>
+								<button 
+									class="btn btn-error btn-sm gap-2" 
+									disabled={user.id==$curentUser?.id} 
+									on:click={()=>deleteUser(user.id,user.name)}
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+									</svg>
+									Delete
+								</button>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>
 
 {#if $showDialog}
 	<div class="modal modal-open">
-		<div class=" rounded p-6 shadow-lg modal-box">
-			<h2 class="mb-4 text-xl font-bold">Change Tokens</h2>
-			<p>Selected Users: {$selectedUsers.length}</p>
-			<label class="mb-2 block" for="tokensAmmount">Token amount</label>
-			<input
-				id="tokensAmmount"
-				type="number"
-				class="input input-bordered mb-4 w-full"
-				bind:value={$tokensAmmount}
-			/>
-			<label class="mb-2 block" for="tokensAmmount">Reason</label>
-			<input
-				id="tokensAmmount"
-				type="text"
-				class="input input-bordered mb-4 w-full"
-				bind:value={$tokensChangeReason}
-			/>
-			<div class="flex justify-end">
-				<button class="btn btn-secondary mr-2" on:click={closeDialog}>Cancel</button>
-				<button class="btn btn-primary" on:click={changeTokens}>Submit</button>
+		<div class="modal-box max-w-lg shadow-2xl">
+			<h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				Change Tokens
+			</h2>
+			<div class="bg-base-200 rounded-box p-4 mb-4">
+				<p class="text-sm opacity-70">Selected Users</p>
+				<p class="text-2xl font-bold">{$selectedUsers.length}</p>
+			</div>
+			<div class="form-control mb-4">
+				<label class="label" for="tokensAmmount">
+					<span class="label-text font-semibold">Token Amount</span>
+				</label>
+				<input
+					id="tokensAmmount"
+					type="number"
+					class="input input-bordered w-full"
+					bind:value={$tokensAmmount}
+					placeholder="Enter amount..."
+				/>
+			</div>
+			<div class="form-control mb-4">
+				<label class="label" for="tokensReason">
+					<span class="label-text font-semibold">Reason</span>
+				</label>
+				<input
+					id="tokensReason"
+					type="text"
+					class="input input-bordered w-full"
+					bind:value={$tokensChangeReason}
+					placeholder="Enter reason..."
+				/>
+			</div>
+			<div class="flex gap-2 justify-end">
+				<button class="btn gap-2" on:click={closeDialog}>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+					Cancel
+				</button>
+				<button class="btn btn-primary gap-2" on:click={changeTokens}>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+					</svg>
+					Submit
+				</button>
 			</div>
 		</div>
 	</div>

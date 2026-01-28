@@ -91,8 +91,8 @@
 	<div class="space-y-6">
 		<!-- Header Section -->
 		<div class="bg-base-200 rounded-box p-6 shadow-lg border border-base-content/10">
-			<h1 class="text-3xl font-bold mb-4 flex items-center gap-3">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<h1 class="text-2xl font-bold mb-4 flex items-center gap-2">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
 				</svg>
 				Active Auctions
@@ -180,14 +180,14 @@
 		{/if}
 	</div>
 {:else}
-	<div class="hero min-h-[60vh] bg-base-200 rounded-box shadow-xl">
+	<div class="hero min-h-[50vh] bg-base-200 rounded-box shadow-xl">
 		<div class="hero-content text-center">
 			<div class="max-w-md">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-6 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
 				</svg>
-				<h1 class="text-4xl font-bold mb-4">Welcome to Auction House</h1>
-				<p class="text-lg opacity-80 mb-6">Please log in to view and participate in auctions</p>
+				<h1 class="text-3xl font-bold mb-3">Welcome to Auction House</h1>
+				<p class="text-base opacity-80 mb-4">Please log in to view and participate in auctions</p>
 			</div>
 		</div>
 	</div>

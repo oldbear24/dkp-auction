@@ -20,6 +20,6 @@
 
 <footer class="footer footer-center bg-base-300 text-base-content p-4 mt-auto border-t border-base-content/10">
   <aside>
-    <p class="text-sm opacity-70">© 2024 DKP Auction House - All rights reserved</p>
+    <p class="text-sm opacity-70">© 2025 DKP Auction House - All rights reserved</p>
   </aside>
 </footer>

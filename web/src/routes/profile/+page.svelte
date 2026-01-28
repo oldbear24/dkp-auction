@@ -222,13 +222,13 @@
 		{#if transactions.totalPages > 1}
 			<div class="flex justify-center mt-4">
 				<div class="join shadow-lg">
-					<button class="join-item btn" on:click={() => getTransactions(currentPage - 1)} disabled={currentPage === 1}>
+					<button class="join-item btn" on:click={() => getTransactions(currentPage - 1)} disabled={currentPage === 1} aria-label="Previous page">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 						</svg>
 					</button>
 					<button class="join-item btn pointer-events-none">Page {currentPage} of {transactions.totalPages}</button>
-					<button class="join-item btn" on:click={() => getTransactions(currentPage + 1)} disabled={currentPage === transactions.totalPages}>
+					<button class="join-item btn" on:click={() => getTransactions(currentPage + 1)} disabled={currentPage === transactions.totalPages} aria-label="Next page">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 						</svg>

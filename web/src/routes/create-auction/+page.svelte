@@ -186,9 +186,7 @@
 					bind:value={$endTime} 
 					type="datetime-local"
 				/>
-				<label class="label">
-					<span class="label-text-alt">Quick select:</span>
-				</label>
+				<div class="label-text-alt">Quick select:</div>
 				<div class="flex gap-2">
 					<button class="btn btn-sm btn-outline gap-2" on:click={()=>getNextDate(1)} type="button">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

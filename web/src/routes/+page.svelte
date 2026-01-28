@@ -107,7 +107,7 @@
 							bind:value={searchQuery}
 							on:input={handleSearch}
 						/>
-						<button class="btn btn-square btn-primary">
+						<button class="btn btn-square btn-primary" aria-label="Search">
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
 							</svg>
@@ -155,6 +155,7 @@
 						tabindex="-1"
 						on:click={() => changePage(currentPage - 1)}
 						disabled={currentPage === 1}
+						aria-label="Previous page"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -168,6 +169,7 @@
 						tabindex="-1"
 						on:click={() => changePage(currentPage + 1)}
 						disabled={currentPage === items.totalPages || items.totalPages === 0}
+						aria-label="Next page"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

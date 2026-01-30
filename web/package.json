@@ -27,7 +27,7 @@
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.4.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",
-		"svelte": "^5.49.0",
+		"svelte": "^5.49.1",
 		"svelte-check": "^4.3.4",
 		"tailwindcss": "^4.1.17",
 		"typescript": "^5.8.3",
@@ -38,6 +38,6 @@
 		"@tailwindcss/postcss": "^4.1.18",
 		"@tailwindcss/vite": "^4.1.18",
 		"dotenv": "^17.2.3",
-		"pocketbase": "^0.26.7"
+		"pocketbase": "^0.26.8"
 	}
 }
